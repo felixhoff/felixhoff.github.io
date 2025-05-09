@@ -223,6 +223,45 @@ p.just {
   background-color: var(--text-color);
   color: var(--card-bg);
 }
+
+.copy-citation {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 5px 10px;
+  font-size: 85%;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+  margin-left: 10px;
+}
+
+.copy-citation:hover {
+  opacity: 1;
+}
+
+.copy-citation i {
+  margin-right: 5px;
+}
+
+.citation-tooltip {
+  position: fixed;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 85%;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  border: 1px solid var(--border-color);
+}
+
+.citation-tooltip.visible {
+  opacity: 1;
+}
 </style>
 </head>
 <div class="navbar w3-teal">
@@ -355,7 +394,12 @@ p.just {
             <a href="https://arxiv.org/pdf/2504.00094" target="_blank" class="publication-title">Quantum cryptography integrating an optical quantum memory</a>
             <p class="publication-authors">Hadriel Mamann, Thomas Nieddu, <b>Félix Hoffet</b>, Mathieu Bozzio, Félix Garreau
               de Loubresse, Iordanis Kerenidis, Eleni Diamanti,  Alban Urvoy, and Julien Laurat</p>
-            <a href="https://arxiv.org/pdf/2504.00094" target="_blank" class="w3-text-teal publication-link">arXiv (2025)</a>
+            <div style="display: flex; align-items: center;">
+              <a href="https://arxiv.org/pdf/2504.00094" target="_blank" class="w3-text-teal publication-link">arXiv (2025)</a>
+              <button class="copy-citation" onclick="copyCitation('mamann2025quantum')">
+                <i class="fa fa-copy"></i>Copy Citation
+              </button>
+            </div>
             <div class="publication-abstract">
               <p><strong>Abstract:</strong> Developments in scalable quantum networks
                 rely critically on optical quantum memories,
@@ -453,6 +497,8 @@ p.just {
   <i class="fa fa-arrow-up"></i>
 </a>
 
+<div class="citation-tooltip" id="citationTooltip">Citation copied!</div>
+
 <script>
 function toggleTheme() {
   const html = document.documentElement;
@@ -500,6 +546,78 @@ backToTopButton.addEventListener('click', (e) => {
     top: 0,
     behavior: 'smooth'
   });
+});
+
+// Citation data
+const citations = {
+  'mamann2025quantum': `@article{mamann2025quantum,
+  title={Quantum cryptography integrating an optical quantum memory},
+  author={Mamann, Hadriel and Nieddu, Thomas and Hoffet, F{\'e}lix and Bozzio, Mathieu and de Loubresse, F{\'e}lix Garreau and Kerenidis, Iordanis and Diamanti, Eleni and Urvoy, Alban and Laurat, Julien},
+  journal={arXiv preprint arXiv:2504.00094},
+  year={2025}
+}`,
+  'hoffet2025collective': `@article{hoffet2025collective,
+  title={Collective vacuum-Rabi splitting with an atomic spin wave coupled to a cavity mode},
+  author={Hoffet, F{\'e}lix and Vylegzhanin, Alexey and Distante, Emanuele and Heller, Lukas and Chormaic, Sile Nic and de Riedmatten, Hugues},
+  journal={arXiv preprint arXiv:2503.22354},
+  year={2025}
+}`,
+  'hoffet2024near': `@article{hoffet2024near,
+  title={Near-unity indistinguishability of single photons emitted from dissimilar and independent atomic quantum nodes},
+  author={Hoffet, F{\'e}lix and Lowinski, Jan and Heller, Lukas and Padr{\'o}n-Brito, Auxiliadora and de Riedmatten, Hugues},
+  journal={PRX Quantum},
+  volume={5},
+  number={3},
+  pages={030305},
+  year={2024},
+  publisher={APS}
+}`,
+  'lowinski2024strongly': `@article{lowinski2024strongly,
+  title={Strongly Nonlinear Interaction between Nonclassical Light and a Blockaded Rydberg Atomic Ensemble},
+  author={Lowinski, Jan and Heller, Lukas and Hoffet, F{\'e}lix and Padr{\'o}n-Brito, Auxiliadora and Theophilo, Klara and de Riedmatten, Hugues},
+  journal={Physical Review Letters},
+  volume={132},
+  number={5},
+  pages={053001},
+  year={2024},
+  publisher={APS}
+}`,
+  'cao2020efficient': `@article{cao2020efficient,
+  title={Efficient reversible entanglement transfer between light and quantum memories},
+  author={Cao, Mingtao and Hoffet, F{\'e}lix and Qiu, Shuwei and Sheremet, Alexandra S and Laurat, Julien},
+  journal={Optica},
+  volume={7},
+  number={12},
+  pages={1440--1444},
+  year={2020},
+  publisher={Optica Publishing Group}
+}`,
+  'hoffet2022thesis': `@phdthesis{hoffet2022thesis,
+  title={Highly-efficient entanglement transfer into and out of cold-atom quantum memories},
+  author={Hoffet, F{\'e}lix},
+  school={Sorbonne Universit{\'e}},
+  year={2022}
+}`
+};
+
+function copyCitation(key) {
+  const citation = citations[key];
+  navigator.clipboard.writeText(citation).then(() => {
+    const tooltip = document.getElementById('citationTooltip');
+    tooltip.classList.add('visible');
+    setTimeout(() => {
+      tooltip.classList.remove('visible');
+    }, 2000);
+  });
+}
+
+// Update tooltip position on mouse move
+document.addEventListener('mousemove', (e) => {
+  const tooltip = document.getElementById('citationTooltip');
+  if (tooltip.classList.contains('visible')) {
+    tooltip.style.left = (e.pageX + 10) + 'px';
+    tooltip.style.top = (e.pageY + 10) + 'px';
+  }
 });
 </script>
 
