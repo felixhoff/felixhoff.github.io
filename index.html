@@ -194,6 +194,35 @@ p.just {
 .publication-link:hover {
   text-decoration: underline;
 }
+
+.back-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.3s, background-color 0.3s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+}
+
+.back-to-top.visible {
+  opacity: 1;
+}
+
+.back-to-top:hover {
+  background-color: var(--text-color);
+  color: var(--card-bg);
+}
 </style>
 </head>
 <div class="navbar w3-teal">
@@ -420,6 +449,10 @@ p.just {
   <p>Cold atoms FTW</p>
 </footer>
 
+<a href="#" class="back-to-top" id="backToTop">
+  <i class="fa fa-arrow-up"></i>
+</a>
+
 <script>
 function toggleTheme() {
   const html = document.documentElement;
@@ -448,6 +481,25 @@ document.addEventListener('DOMContentLoaded', () => {
   if (savedTheme === 'dark') {
     button.classList.add('active');
   }
+});
+
+// Back to top button functionality
+const backToTopButton = document.getElementById('backToTop');
+
+window.addEventListener('scroll', () => {
+  if (window.pageYOffset > 300) {
+    backToTopButton.classList.add('visible');
+  } else {
+    backToTopButton.classList.remove('visible');
+  }
+});
+
+backToTopButton.addEventListener('click', (e) => {
+  e.preventDefault();
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
 });
 </script>
 
