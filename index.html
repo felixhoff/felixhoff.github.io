@@ -133,6 +133,54 @@ p.just {
 .dropdown:hover .dropdown-content {
   display: block;
 }
+
+.publication-card {
+  position: relative;
+  transition: all 0.3s ease;
+  padding: 15px;
+  border-radius: 4px;
+}
+
+.publication-card:hover {
+  background-color: var(--card-bg);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.publication-abstract {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  margin-top: 10px;
+  font-size: 90%;
+  color: var(--text-color);
+  opacity: 0;
+}
+
+.publication-card:hover .publication-abstract {
+  max-height: 200px;
+  opacity: 1;
+}
+
+.publication-title {
+  font-size: 108%;
+  margin-bottom: 5px;
+}
+
+.publication-authors {
+  font-size: 85%;
+  font-style: italic;
+  margin-bottom: 5px;
+}
+
+.publication-link {
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+.publication-link:hover {
+  text-decoration: underline;
+}
 </style>
 </head>
 <div class="navbar w3-teal">
@@ -261,46 +309,70 @@ p.just {
       <div class="w3-container w3-card w3-white">
         <h2 class="w3-text-teal w3-padding-16">Publications</h2>
         <div class="w3-container">
-          <p style="font-size:108%;">Quantum cryptography integrating an optical quantum memory<br>
-          <i style="font-size:85%;" class="b">Hadriel Mamann, Thomas Nieddu, <b>Félix Hoffet</b>, Mathieu Bozzio, Félix Garreau
-            de Loubresse, Iordanis Kerenidis, Eleni Diamanti,  Alban Urvoy, and Julien Laurat</i> <br>
-          <a href="https://arxiv.org/pdf/2504.00094" target="_blank" class="w3-text-teal b"><p style="font-size:90%;">arXiv <b></b> (2025)</p></a>
-          </p>
+          <div class="publication-card">
+            <p class="publication-title">Quantum cryptography integrating an optical quantum memory</p>
+            <p class="publication-authors">Hadriel Mamann, Thomas Nieddu, <b>Félix Hoffet</b>, Mathieu Bozzio, Félix Garreau
+              de Loubresse, Iordanis Kerenidis, Eleni Diamanti,  Alban Urvoy, and Julien Laurat</p>
+            <a href="https://arxiv.org/pdf/2504.00094" target="_blank" class="w3-text-teal publication-link">arXiv (2025)</a>
+            <div class="publication-abstract">
+              <p><strong>Abstract:</strong> This is a placeholder for the abstract. You can replace this text with the actual abstract of the paper. The abstract will be revealed when hovering over the publication card.</p>
+            </div>
+          </div>
           <hr>
         </div>
         <div class="w3-container">
-          <p style="font-size:108%;">Collective vacuum-Rabi splitting with an atomic spin wave coupled to a cavity mode<br>
-          <i style="font-size:85%;" class="b"><b>Félix Hoffet</b>, Alexey Vylegzhanin, Emanuele Distante, Lukas Heller, Sile Nic Chormaic, and Hugues de Riedmatten</i> <br>
-          <a href="https://arxiv.org/pdf/2503.22354" target="_blank" class="w3-text-teal b"><p style="font-size:90%;">arXiv <b></b> (2025)</p></a>
-          </p>
+          <div class="publication-card">
+            <p class="publication-title">Collective vacuum-Rabi splitting with an atomic spin wave coupled to a cavity mode</p>
+            <p class="publication-authors"><b>Félix Hoffet</b>, Alexey Vylegzhanin, Emanuele Distante, Lukas Heller, Sile Nic Chormaic, and Hugues de Riedmatten</p>
+            <a href="https://arxiv.org/pdf/2503.22354" target="_blank" class="w3-text-teal publication-link">arXiv (2025)</a>
+            <div class="publication-abstract">
+              <p><strong>Abstract:</strong> This is a placeholder for the abstract. You can replace this text with the actual abstract of the paper. The abstract will be revealed when hovering over the publication card.</p>
+            </div>
+          </div>
           <hr>
         </div>
         <div class="w3-container">
-          <p style="font-size:108%;">Near-unity indistinguishability of single photons emitted from dissimilar and independent atomic quantum nodes<br>
-          <i style="font-size:85%;" class="b"><b>Félix Hoffet</b>, Jan Lowinski, Lukas Heller, Auxiliadora Padrón-Brito, and Hugues de Riedmatten</i> <br>
-          <a href="https://journals.aps.org/prxquantum/pdf/10.1103/PRXQuantum.5.030305" target="_blank" class="w3-text-teal b"><p style="font-size:90%;">PRX Quantum <b>5</b>, 030305 (2024)</p></a>
-          </p>
+          <div class="publication-card">
+            <p class="publication-title">Near-unity indistinguishability of single photons emitted from dissimilar and independent atomic quantum nodes</p>
+            <p class="publication-authors"><b>Félix Hoffet</b>, Jan Lowinski, Lukas Heller, Auxiliadora Padrón-Brito, and Hugues de Riedmatten</p>
+            <a href="https://journals.aps.org/prxquantum/pdf/10.1103/PRXQuantum.5.030305" target="_blank" class="w3-text-teal publication-link">PRX Quantum <b>5</b>, 030305 (2024)</a>
+            <div class="publication-abstract">
+              <p><strong>Abstract:</strong> This is a placeholder for the abstract. You can replace this text with the actual abstract of the paper. The abstract will be revealed when hovering over the publication card.</p>
+            </div>
+          </div>
           <hr>
         </div>
         <div class="w3-container">
-          <p style="font-size:108%;">Strongly Nonlinear Interaction between Nonclassical Light and a Blockaded Rydberg Atomic Ensemble <br>
-          <i style="font-size:85%;" class="b">Jan Lowinski, Lukas Heller, <b>Félix Hoffet</b>, Auxiliadora Padrón-Brito, Klara Theophilo, and Hugues de Riedmatten</i> <br>
-          <a href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.132.053001" target="_blank" class="w3-text-teal b"><p style="font-size:90%;">Phys. Rev. Lett. <b>132</b>, 053001 (2024)</p></a>
-          </p>
+          <div class="publication-card">
+            <p class="publication-title">Strongly Nonlinear Interaction between Nonclassical Light and a Blockaded Rydberg Atomic Ensemble</p>
+            <p class="publication-authors">Jan Lowinski, Lukas Heller, <b>Félix Hoffet</b>, Auxiliadora Padrón-Brito, Klara Theophilo, and Hugues de Riedmatten</p>
+            <a href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.132.053001" target="_blank" class="w3-text-teal publication-link">Phys. Rev. Lett. <b>132</b>, 053001 (2024)</a>
+            <div class="publication-abstract">
+              <p><strong>Abstract:</strong> This is a placeholder for the abstract. You can replace this text with the actual abstract of the paper. The abstract will be revealed when hovering over the publication card.</p>
+            </div>
+          </div>
           <hr>
         </div>
         <div class="w3-container">
-          <p style="font-size:108%;" class="b">Efficient reversible entanglement transfer between light and quantum memories <br>
-          <i style="font-size:85%;" class="b">Mingtao Cao*, <b>Félix Hoffet *</b>, Shuwei Qiu, Alexandra S. Sheremet, and Julien Laurat</i> <br>
-          <a href="https://doi.org/10.1364/OPTICA.400695" target="_blank" class="w3-text-teal b"><p style="font-size:90%;">Optica <b>7</b>, 1440-1444 (2020)</p></a>
-          </p>
+          <div class="publication-card">
+            <p class="publication-title">Efficient reversible entanglement transfer between light and quantum memories</p>
+            <p class="publication-authors">Mingtao Cao*, <b>Félix Hoffet *</b>, Shuwei Qiu, Alexandra S. Sheremet, and Julien Laurat</p>
+            <a href="https://doi.org/10.1364/OPTICA.400695" target="_blank" class="w3-text-teal publication-link">Optica <b>7</b>, 1440-1444 (2020)</a>
+            <div class="publication-abstract">
+              <p><strong>Abstract:</strong> This is a placeholder for the abstract. You can replace this text with the actual abstract of the paper. The abstract will be revealed when hovering over the publication card.</p>
+            </div>
+          </div>
           <hr>
         </div>
         <div class="w3-container">
-          <p style="font-size:108%;" class="b">Highly-efficient entanglement transfer into and out of cold-atom quantum memories <br>
-          <i style="font-size:85%;" class="b"><b>Félix Hoffet</b></i> <br>
-          <a href="https://theses.hal.science/tel-03813606" target="_blank" class="w3-text-teal b"><p style="font-size:90%;">PhD thesis (2022)</p></a>
-          </p>
+          <div class="publication-card">
+            <p class="publication-title">Highly-efficient entanglement transfer into and out of cold-atom quantum memories</p>
+            <p class="publication-authors"><b>Félix Hoffet</b></p>
+            <a href="https://theses.hal.science/tel-03813606" target="_blank" class="w3-text-teal publication-link">PhD thesis (2022)</a>
+            <div class="publication-abstract">
+              <p><strong>Abstract:</strong> This is a placeholder for the abstract. You can replace this text with the actual abstract of the paper. The abstract will be revealed when hovering over the publication card.</p>
+            </div>
+          </div>
           <hr>
         </div>
       </div>
