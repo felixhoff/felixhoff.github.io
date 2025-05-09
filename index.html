@@ -272,6 +272,37 @@ p.just {
 .citation-tooltip.visible {
   opacity: 1;
 }
+
+.like-button {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 5px 10px;
+  font-size: 14px;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.like-button:hover {
+  opacity: 1;
+}
+
+.like-button.liked {
+  color: #e74c3c;
+}
+
+.like-button i {
+  font-size: 16px;
+}
+
+.like-count {
+  font-size: 14px;
+  opacity: 0.8;
+}
 </style>
 </head>
 <div class="navbar w3-teal">
@@ -352,6 +383,10 @@ p.just {
         <div class="w3-center">
           <img src="/images/rydberg_setup.jpeg" style="width: 100%; max-width: 250px; height: auto;" alt="Paper Figure" class="w3-image w3-margin-top">
         </div>
+        <button class="like-button" onclick="toggleLike('news2')" id="likeButton2">
+          <i class="fa fa-heart"></i>
+          <span class="like-count" id="likeCount2">0</span>
+        </button>
         <hr class="w3-border-light-grey">
       </div>
 
@@ -366,6 +401,10 @@ p.just {
         <div class="w3-center">
           <img src="/images/paper_figure.PNG" style="width: 100%; max-width: 400px; height: auto;" alt="Paper Figure" class="w3-image w3-margin-top">
         </div>
+        <button class="like-button" onclick="toggleLike('news1')" id="likeButton1">
+          <i class="fa fa-heart"></i>
+          <span class="like-count" id="likeCount1">0</span>
+        </button>
         <hr class="w3-border-light-grey">
       </div>
 
@@ -653,6 +692,45 @@ document.addEventListener('mousemove', (e) => {
     tooltip.style.left = (e.pageX + 10) + 'px';
     tooltip.style.top = (e.pageY + 10) + 'px';
   }
+});
+
+// Like button functionality
+function toggleLike(newsId) {
+  const button = document.getElementById(`likeButton${newsId.slice(-1)}`);
+  const countElement = document.getElementById(`likeCount${newsId.slice(-1)}`);
+  
+  // Get current likes from localStorage
+  let likes = JSON.parse(localStorage.getItem('newsLikes') || '{}');
+  
+  if (likes[newsId]) {
+    // Unlike
+    likes[newsId] = false;
+    button.classList.remove('liked');
+    countElement.textContent = parseInt(countElement.textContent) - 1;
+  } else {
+    // Like
+    likes[newsId] = true;
+    button.classList.add('liked');
+    countElement.textContent = parseInt(countElement.textContent) + 1;
+  }
+  
+  // Save to localStorage
+  localStorage.setItem('newsLikes', JSON.stringify(likes));
+}
+
+// Initialize like buttons on page load
+document.addEventListener('DOMContentLoaded', () => {
+  const likes = JSON.parse(localStorage.getItem('newsLikes') || '{}');
+  
+  // Update button states and counts
+  Object.entries(likes).forEach(([newsId, isLiked]) => {
+    if (isLiked) {
+      const button = document.getElementById(`likeButton${newsId.slice(-1)}`);
+      const countElement = document.getElementById(`likeCount${newsId.slice(-1)}`);
+      button.classList.add('liked');
+      countElement.textContent = parseInt(countElement.textContent) + 1;
+    }
+  });
 });
 </script>
 
