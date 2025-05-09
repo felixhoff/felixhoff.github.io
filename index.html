@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="light">
 <head>
 
 <title>Felix Hoffet webpage</title>
@@ -9,6 +9,49 @@
 <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto'>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
+:root[data-theme="light"] {
+  --bg-color: #f1f1f1;
+  --text-color: #333;
+  --card-bg: #fff;
+  --border-color: #ddd;
+}
+
+:root[data-theme="dark"] {
+  --bg-color: #1a1a1a;
+  --text-color: #f1f1f1;
+  --card-bg: #2d2d2d;
+  --border-color: #404040;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.w3-white {
+  background-color: var(--card-bg) !important;
+  color: var(--text-color) !important;
+}
+
+.w3-card-4 {
+  border-color: var(--border-color) !important;
+}
+
+.theme-toggle {
+  float: right;
+  padding: 14px 16px;
+  color: white;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-size: 16px;
+}
+
+.theme-toggle:hover {
+  background-color: red;
+}
+
 html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
 .w3-display-container img {
   display: block;
@@ -92,7 +135,10 @@ p.just {
     <div class="dropdown-content">
       <a href="home.html">Personal notes</a>
     </div>
-  </div> 
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <i class="fa fa-moon-o"></i>
+  </button>
 </div>
 <body class="w3-light-grey">
 
@@ -149,7 +195,7 @@ p.just {
     <div class="w3-container">
       <h5 class="w3-text-teal"><strong>Latest News</strong></h5>
 
-      <!-- News Item 2 (Fake Example) -->
+      <!-- News Item 2 -->
       <div class="w3-section">
         <div class="w3-right w3-small w3-text-teal" style="margin-top: -10px;">April 2025</div>
         <p class="w3-small w3-left-align">
@@ -262,6 +308,31 @@ p.just {
 <footer class="w3-container w3-teal w3-center w3-margin-top">
   <p>Cold atoms FTW</p>
 </footer>
+
+<script>
+function toggleTheme() {
+  const html = document.documentElement;
+  const currentTheme = html.getAttribute('data-theme');
+  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+  
+  html.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+  
+  // Update icon
+  const icon = document.querySelector('.theme-toggle i');
+  icon.className = newTheme === 'light' ? 'fa fa-moon-o' : 'fa fa-sun-o';
+}
+
+// Check for saved theme preference
+document.addEventListener('DOMContentLoaded', () => {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  
+  // Set initial icon
+  const icon = document.querySelector('.theme-toggle i');
+  icon.className = savedTheme === 'light' ? 'fa fa-moon-o' : 'fa fa-sun-o';
+});
+</script>
 
 </body>
 </html>
