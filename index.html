@@ -136,21 +136,20 @@ p.just {
 
 .publication-card {
   position: relative;
-  transition: all 0.3s ease;
+  transition: all 0.5s ease;
   padding: 15px;
   border-radius: 4px;
 }
 
 .publication-card:hover {
   background-color: var(--card-bg);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   transform: translateY(-2px);
 }
 
 .publication-abstract {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease;
+  transition: max-height 0.5s ease, opacity 0.5s ease;
   margin-top: 10px;
   font-size: 90%;
   color: var(--text-color);
