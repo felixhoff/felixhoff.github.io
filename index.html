@@ -24,9 +24,13 @@
 }
 
 body {
-  background-color: var(--bg-color);
+  background-color: var(--bg-color) !important;
   color: var(--text-color);
   transition: background-color 0.3s, color 0.3s;
+}
+
+.w3-light-grey {
+  background-color: var(--bg-color) !important;
 }
 
 .w3-white {
@@ -46,10 +50,15 @@ body {
   background: none;
   border: none;
   font-size: 16px;
+  transition: all 0.3s ease;
 }
 
 .theme-toggle:hover {
   background-color: red;
+}
+
+.theme-toggle.active {
+  background-color: #006666;
 }
 
 html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
@@ -318,9 +327,13 @@ function toggleTheme() {
   html.setAttribute('data-theme', newTheme);
   localStorage.setItem('theme', newTheme);
   
-  // Update icon
-  const icon = document.querySelector('.theme-toggle i');
-  icon.className = newTheme === 'light' ? 'fa fa-moon-o' : 'fa fa-sun-o';
+  // Update button state
+  const button = document.querySelector('.theme-toggle');
+  if (newTheme === 'dark') {
+    button.classList.add('active');
+  } else {
+    button.classList.remove('active');
+  }
 }
 
 // Check for saved theme preference
@@ -328,9 +341,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const savedTheme = localStorage.getItem('theme') || 'light';
   document.documentElement.setAttribute('data-theme', savedTheme);
   
-  // Set initial icon
-  const icon = document.querySelector('.theme-toggle i');
-  icon.className = savedTheme === 'light' ? 'fa fa-moon-o' : 'fa fa-sun-o';
+  // Set initial button state
+  const button = document.querySelector('.theme-toggle');
+  if (savedTheme === 'dark') {
+    button.classList.add('active');
+  }
 });
 </script>
 
