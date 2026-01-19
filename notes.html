@@ -23,13 +23,25 @@
   --text-color: #333;
   --card-bg: #fff;
   --border-color: #ddd;
+  --accent-color: #ff6b6b;
+  --accent-gradient: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%);
+  --teal-color: #009688;
+  --teal-gradient: linear-gradient(135deg, #009688 0%, #00bfa5 100%);
+  --navbar-bg: #009688;
+  --navbar-shadow: 0 2px 20px rgba(0,0,0,0.1);
 }
 
 :root[data-theme="dark"] {
-  --bg-color: #1a1a1a;
+  --bg-color: #121212;
   --text-color: #f1f1f1;
   --card-bg: #2d2d2d;
   --border-color: #404040;
+  --accent-color: #ff8787;
+  --accent-gradient: linear-gradient(135deg, #ff8787 0%, #ffa5a5 100%);
+  --teal-color: #00bfa5;
+  --teal-gradient: linear-gradient(135deg, #00bfa5 0%, #1de9b6 100%);
+  --navbar-bg: #1a2332;
+  --navbar-shadow: 0 2px 20px rgba(0,0,0,0.3);
 }
 
 body {
@@ -38,7 +50,43 @@ body {
   transition: background-color 0.3s, color 0.3s;
 }
 
-.w3-light-grey {
+:root[data-theme="light"] body {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 35px,
+      rgba(0, 150, 136, 0.03) 35px,
+      rgba(0, 150, 136, 0.03) 70px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 35px,
+      rgba(0, 150, 136, 0.02) 35px,
+      rgba(0, 150, 136, 0.02) 70px
+    );
+}
+
+:root[data-theme="dark"] body {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 35px,
+      rgba(0, 191, 165, 0.05) 35px,
+      rgba(0, 191, 165, 0.05) 70px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 35px,
+      rgba(0, 191, 165, 0.03) 35px,
+      rgba(0, 191, 165, 0.03) 70px
+    );
+}
+
+.w3-light-grey, body.w3-light-grey {
   background-color: var(--bg-color) !important;
 }
 
@@ -47,27 +95,39 @@ body {
   color: var(--text-color) !important;
 }
 
-.w3-card-4 {
-  border-color: var(--border-color) !important;
+.w3-card, .w3-card-4 {
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+  overflow: hidden !important;
 }
 
 .theme-toggle {
   float: right;
-  padding: 14px 16px;
-  color: white;
+  padding: 10px 14px;
+  color: var(--text-color);
   cursor: pointer;
-  background: none;
-  border: none;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
   font-size: 16px;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin: 8px 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .theme-toggle:hover {
-  background-color: red;
+  background: var(--accent-gradient);
+  color: white;
+  border-color: transparent;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
 }
 
 .theme-toggle.active {
-  background-color: #006666;
+  background: var(--accent-gradient);
+  color: white;
+  border-color: transparent;
 }
 
 html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
@@ -85,16 +145,56 @@ p.just {
 }
 .navbar {
   overflow: hidden;
-  background-color: #333;
+  background: var(--navbar-bg);
+  backdrop-filter: blur(20px);
+  box-shadow: var(--navbar-shadow);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
 .navbar a {
   float: left;
-  font-size: 16px;
+  font-size: 15px;
+  font-weight: 500;
   color: white;
   text-align: center;
-  padding: 14px 16px;
+  padding: 16px 20px;
   text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.navbar a.active {
+  background: rgba(0, 150, 136, 0.15);
+  border-bottom: 3px solid white;
+}
+
+:root[data-theme="dark"] .navbar a.active {
+  background: rgba(0, 191, 165, 0.2);
+}
+
+.navbar a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background: var(--accent-gradient);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(-50%);
+  border-radius: 3px 3px 0 0;
+}
+
+.navbar a:hover::after {
+  width: 80%;
+}
+
+.navbar a.active::after {
+  display: none;
 }
 
 .dropdown {
@@ -103,74 +203,119 @@ p.just {
 }
 
 .dropdown .dropbtn {
-  font-size: 16px;  
+  font-size: 15px;
+  font-weight: 500;
   border: none;
   outline: none;
-  color: white;
-  padding: 14px 16px;
+  color: var(--text-color);
+  padding: 16px 20px;
   background-color: inherit;
   font-family: inherit;
   margin: 0;
+  transition: all 0.3s ease;
 }
 
 .navbar a:hover, .dropdown:hover .dropbtn {
-  background-color: red;
+  color: var(--accent-color);
+  background: transparent;
 }
 
 .dropdown-content {
   display: none;
   position: absolute;
-  background-color: #f9f9f9;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  background: var(--card-bg);
+  min-width: 200px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
   z-index: 1;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  margin-top: 8px;
+  backdrop-filter: blur(20px);
 }
 
 .dropdown-content a {
   float: none;
-  color: black;
-  padding: 12px 16px;
+  color: var(--text-color);
+  padding: 12px 20px;
   text-decoration: none;
   display: block;
   text-align: left;
+  transition: all 0.2s ease;
 }
 
 .dropdown-content a:hover {
-  background-color: #ddd;
+  background: var(--accent-gradient);
+  color: white;
+}
+
+.dropdown-content a:first-child:hover {
+  border-radius: 8px 8px 0 0;
+}
+
+.dropdown-content a:last-child:hover {
+  border-radius: 0 0 8px 8px;
 }
 
 .dropdown:hover .dropdown-content {
   display: block;
 }
+
+/* Notes specific styles */
+.notes-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.note-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.note-item:last-child {
+  border-bottom: none;
+}
+
+.note-title {
+  font-size: 100%;
+  font-weight: 400;
+  color: var(--text-color);
+  display: inline;
+  margin-right: 10px;
+}
+
+.note-link {
+  color: var(--teal-color);
+  text-decoration: none;
+  font-size: 90%;
+  transition: opacity 0.2s ease;
+}
+
+.note-link:hover {
+  opacity: 0.7;
+  text-decoration: underline;
+}
 </style>
 </head>
-<div class="navbar w3-teal">
+<div class="navbar">
   <a href="index.html">Home</a>
-  <a href="notes.html">Personal Notes</a>
-  <a href="https://quantum-memory-simulator.streamlit.app/" target="_blank">Quantum Memory Simulator</a>
+  <a href="notes.html" class="active">Personal Notes</a>
   <button class="theme-toggle" onclick="toggleTheme()">
     <i class="fa fa-moon-o"></i>
   </button>
 </div>
 <body class="w3-light-grey">
 
-  <div class="w3-container w3-card w3-white">
-    <h2 class="w3-text-teal w3-padding-16">Personal notes</h2>
-
-    <div class="w3-container">
-      <p style="font-size:108%;"> DLCZ cheat sheet
-      <a href="pdf/DLCZ_cheat_sheet.pdf" target="_blank" class="w3-text-teal b"><p style="font-size:90%;">Link</p></a>
-      </p>
-      <hr>
+  <div class="notes-container">
+    <div class="note-item">
+      <span class="note-title">DLCZ cheat sheet</span>
+      <a href="pdf/DLCZ_cheat_sheet.pdf" target="_blank" class="note-link">[PDF]</a>
     </div>
 
-    <div class="w3-container">
-      <p style="font-size:108%;"> Notes on crossed optical dipole traps
-      <a href="pdf/Crossed_Dipole_Trap_notes.pdf" target="_blank" class="w3-text-teal b"><p style="font-size:90%;">Link</p></a>
-      </p>
-      <hr>
+    <div class="note-item">
+      <span class="note-title">Notes on crossed optical dipole traps</span>
+      <a href="pdf/Crossed_Dipole_Trap_notes.pdf" target="_blank" class="note-link">[PDF]</a>
     </div>
-
   </div>
 
 

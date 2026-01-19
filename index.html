@@ -14,13 +14,25 @@
   --text-color: #333;
   --card-bg: #fff;
   --border-color: #ddd;
+  --accent-color: #ff6b6b;
+  --accent-gradient: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%);
+  --teal-color: #009688;
+  --teal-gradient: linear-gradient(135deg, #009688 0%, #00bfa5 100%);
+  --navbar-bg: #009688;
+  --navbar-shadow: 0 2px 20px rgba(0,0,0,0.1);
 }
 
 :root[data-theme="dark"] {
-  --bg-color: #1a1a1a;
+  --bg-color: #121212;
   --text-color: #f1f1f1;
   --card-bg: #2d2d2d;
   --border-color: #404040;
+  --accent-color: #ff8787;
+  --accent-gradient: linear-gradient(135deg, #ff8787 0%, #ffa5a5 100%);
+  --teal-color: #00bfa5;
+  --teal-gradient: linear-gradient(135deg, #00bfa5 0%, #1de9b6 100%);
+  --navbar-bg: #1a2332;
+  --navbar-shadow: 0 2px 20px rgba(0,0,0,0.3);
 }
 
 body {
@@ -29,7 +41,43 @@ body {
   transition: background-color 0.3s, color 0.3s;
 }
 
-.w3-light-grey {
+:root[data-theme="light"] body {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 35px,
+      rgba(0, 150, 136, 0.03) 35px,
+      rgba(0, 150, 136, 0.03) 70px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 35px,
+      rgba(0, 150, 136, 0.02) 35px,
+      rgba(0, 150, 136, 0.02) 70px
+    );
+}
+
+:root[data-theme="dark"] body {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 35px,
+      rgba(0, 191, 165, 0.05) 35px,
+      rgba(0, 191, 165, 0.05) 70px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 35px,
+      rgba(0, 191, 165, 0.03) 35px,
+      rgba(0, 191, 165, 0.03) 70px
+    );
+}
+
+.w3-light-grey, body.w3-light-grey {
   background-color: var(--bg-color) !important;
 }
 
@@ -38,27 +86,39 @@ body {
   color: var(--text-color) !important;
 }
 
-.w3-card-4 {
-  border-color: var(--border-color) !important;
+.w3-card, .w3-card-4 {
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+  overflow: hidden !important;
 }
 
 .theme-toggle {
   float: right;
-  padding: 14px 16px;
-  color: white;
+  padding: 10px 14px;
+  color: var(--text-color);
   cursor: pointer;
-  background: none;
-  border: none;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
   font-size: 16px;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin: 8px 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .theme-toggle:hover {
-  background-color: red;
+  background: var(--accent-gradient);
+  color: white;
+  border-color: transparent;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
 }
 
 .theme-toggle.active {
-  background-color: #006666;
+  background: var(--accent-gradient);
+  color: white;
+  border-color: transparent;
 }
 
 html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
@@ -76,16 +136,56 @@ p.just {
 }
 .navbar {
   overflow: hidden;
-  background-color: #333;
+  background: var(--navbar-bg);
+  backdrop-filter: blur(20px);
+  box-shadow: var(--navbar-shadow);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
 .navbar a {
   float: left;
-  font-size: 16px;
+  font-size: 15px;
+  font-weight: 500;
   color: white;
   text-align: center;
-  padding: 14px 16px;
+  padding: 16px 20px;
   text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.navbar a.active {
+  background: rgba(0, 150, 136, 0.15);
+  border-bottom: 3px solid white;
+}
+
+:root[data-theme="dark"] .navbar a.active {
+  background: rgba(0, 191, 165, 0.2);
+}
+
+.navbar a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background: var(--accent-gradient);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(-50%);
+  border-radius: 3px 3px 0 0;
+}
+
+.navbar a:hover::after {
+  width: 80%;
+}
+
+.navbar a.active::after {
+  display: none;
 }
 
 .dropdown {
@@ -94,40 +194,57 @@ p.just {
 }
 
 .dropdown .dropbtn {
-  font-size: 16px;  
+  font-size: 15px;
+  font-weight: 500;
   border: none;
   outline: none;
-  color: white;
-  padding: 14px 16px;
+  color: var(--text-color);
+  padding: 16px 20px;
   background-color: inherit;
   font-family: inherit;
   margin: 0;
+  transition: all 0.3s ease;
 }
 
 .navbar a:hover, .dropdown:hover .dropbtn {
-  background-color: red;
+  color: var(--accent-color);
+  background: transparent;
 }
 
 .dropdown-content {
   display: none;
   position: absolute;
-  background-color: #f9f9f9;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  background: var(--card-bg);
+  min-width: 200px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
   z-index: 1;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  margin-top: 8px;
+  backdrop-filter: blur(20px);
 }
 
 .dropdown-content a {
   float: none;
-  color: black;
-  padding: 12px 16px;
+  color: var(--text-color);
+  padding: 12px 20px;
   text-decoration: none;
   display: block;
   text-align: left;
+  transition: all 0.2s ease;
 }
 
 .dropdown-content a:hover {
-  background-color: #ddd;
+  background: var(--accent-gradient);
+  color: white;
+}
+
+.dropdown-content a:first-child:hover {
+  border-radius: 8px 8px 0 0;
+}
+
+.dropdown-content a:last-child:hover {
+  border-radius: 0 0 8px 8px;
 }
 
 .dropdown:hover .dropdown-content {
@@ -136,42 +253,46 @@ p.just {
 
 .publication-card {
   position: relative;
-  transition: all 0.3s ease;
-  padding: 10px;
-  border-radius: 4px;
-}
-
-.publication-card:hover {
-  background-color: var(--card-bg);
-  transform: translateY(-2px);
+  padding: 16px;
+  border-radius: 10px;
+  margin-bottom: 8px;
 }
 
 .publication-title {
-  font-size: 100%;
-  margin-bottom: 4px;
+  font-size: 91%;
+  margin-bottom: 8px;
   color: var(--text-color);
   text-decoration: none;
   cursor: pointer;
+  font-weight: 600;
+  line-height: 1.5;
+  transition: all 0.2s ease;
 }
 
 .publication-title:hover {
-  color: var(--text-color);
-  text-decoration: underline;
-}
-
-.publication-authors {
-  font-size: 80%;
-  font-style: italic;
-  margin-bottom: 4px;
-}
-
-.publication-link {
-  color: var(--text-color);
+  color: var(--teal-color);
   text-decoration: none;
 }
 
+.publication-authors {
+  font-size: 85%;
+  font-style: italic;
+  margin-bottom: 6px;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.publication-link {
+  color: var(--teal-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
 .publication-link:hover {
-  text-decoration: underline;
+  color: var(--teal-color);
+  text-decoration: none;
+  opacity: 0.8;
 }
 
 .back-to-top {
@@ -230,8 +351,8 @@ p.just {
 .publication-links {
   display: flex;
   align-items: center;
-  margin-top: 3px;
-  font-size: 80%;
+  margin-top: 6px;
+  font-size: 85%;
 }
 
 .citation-tooltip {
@@ -252,10 +373,177 @@ p.just {
 .citation-tooltip.visible {
   opacity: 1;
 }
+
+/* Enhanced section headers */
+.w3-text-teal {
+  position: relative;
+  display: inline-block;
+}
+
+.w3-padding-16.w3-text-teal::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background: var(--teal-gradient);
+  border-radius: 2px;
+}
+
+/* Profile card enhancement */
+.w3-display-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px 8px 0 0;
+}
+
+.w3-display-bottommiddle {
+  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%);
+  width: 100%;
+  padding: 20px !important;
+}
+
+/* Card padding improvements */
+.w3-card-4 .w3-container:first-of-type {
+  padding-top: 16px !important;
+}
+
+.w3-card-4 .w3-container:last-of-type {
+  padding-bottom: 16px !important;
+}
+
+/* Curriculum styling */
+.w3-twothird .w3-container.w3-card {
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+}
+
+.w3-twothird .curriculum-content h5 {
+  font-size: 95%;
+  margin-bottom: 6px;
+}
+
+.w3-twothird h6 {
+  font-size: 85%;
+  margin-bottom: 4px;
+}
+
+.w3-twothird p {
+  font-size: 90%;
+}
+
+/* Curriculum HR styling */
+.w3-twothird hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, var(--teal-color), transparent);
+  margin: 20px 0;
+  opacity: 0.3;
+}
+
+/* Curriculum item layout */
+.curriculum-item {
+  display: flex;
+  align-items: stretch;
+  gap: 20px;
+  padding: 16px;
+}
+
+.curriculum-date {
+  flex-shrink: 0;
+  width: 120px;
+  text-align: center;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(0, 150, 136, 0.05);
+  border-radius: 8px;
+}
+
+.curriculum-date i.fa-calendar {
+  font-size: 20px;
+  color: var(--teal-color);
+  margin-bottom: 4px;
+}
+
+.curriculum-date-text {
+  font-size: 80%;
+  color: var(--teal-color);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.curriculum-arrow {
+  font-size: 18px;
+  color: var(--teal-color);
+  font-weight: bold;
+}
+
+.curriculum-content {
+  flex: 1;
+  padding: 12px;
+  margin-right: 16px;
+}
+
+.curriculum-content h5 {
+  margin-top: 0;
+}
+
+.current-badge {
+  display: inline-block;
+  background: rgba(0, 150, 136, 0.15);
+  color: var(--teal-color);
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 70%;
+  font-weight: 500;
+  margin-left: 10px;
+  vertical-align: middle;
+  border: 1px solid rgba(0, 150, 136, 0.3);
+}
+
+/* Latest News styling */
+.w3-third hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, var(--teal-color), transparent);
+  margin: 20px 0;
+  opacity: 0.3;
+}
+
+/* Date positioning in Latest News */
+.w3-third .w3-right {
+  margin-right: -10px;
+}
+
+.w3-third .w3-right i.fa-calendar {
+  margin-right: 5px;
+}
+
+/* Section headers for right column cards */
+.section-header {
+  background: rgba(0, 150, 136, 0.05);
+  padding: 12px 16px 10px 16px;
+  margin: -16px -16px 16px -16px;
+  border-radius: 8px 8px 0 0;
+}
+
+.section-header h5 {
+  margin: 0 !important;
+  padding: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
 </style>
 </head>
-<div class="navbar w3-teal">
-  <a href="index.html">Home</a>
+<div class="navbar">
+  <a href="index.html" class="active">Home</a>
   <a href="notes.html">Personal Notes</a>
   <button class="theme-toggle" onclick="toggleTheme()">
     <i class="fa fa-moon-o"></i>
@@ -332,7 +620,7 @@ p.just {
       <div class="w3-section">
         <div class="w3-right w3-small w3-text-teal" style="margin-top: -10px;">March 2025</div>
         <p class="w3-small w3-left-align">
-          Check out my latest 
+          Check out my latest
           <a href="https://arxiv.org/pdf/2503.22354" target="_blank" class="w3-text-teal"><strong>paper</strong></a>
           about cavity-enhanced retrieval of collective excitations in atomic ensembles.
         </p>
@@ -353,26 +641,44 @@ p.just {
     <!-- Right Column -->
     <div class="w3-twothird">
     
-      <div class="w3-container w3-card w3-white w3-margin-bottom">
-        <h2 class="w3-text-teal w3-padding-16">Curriculum</h2>
-        <div class="w3-container">
-          <h5 class="w3-text-teal"><b>Postdoctoral researcher</b></h5>
-          <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>July 2022 - <span class="w3-tag w3-teal w3-round">Current</span></h6>
-          <h6><i>ICFO - the Institute of Photonic Sciences - Barcelona</i></h6>
-          <p>with Pr. Hugues de Riedmatten</p>
-          <hr>
+      <div class="w3-container w3-card w3-white w3-margin-bottom w3-padding">
+        <div class="section-header">
+          <h5 class="w3-text-teal"><strong>Curriculum</strong></h5>
         </div>
         <div class="w3-container">
-          <h5 class="w3-text-teal"><b>PhD thesis</b></h5>
-          <h6 class="w3-text-teal"><i class="fa fa-calendar fa-fw w3-margin-right"></i>Mar 2018 - March 2022</h6>
-          <h6><i>LKB - Laboratoire Kastler-Brossel - Paris</i></h6>
-          <p>with Pr. Julien Laurat</p>
-          <hr>
+          <div class="curriculum-item">
+            <div class="curriculum-date">
+              <div class="curriculum-date-text">July 2022</div>
+              <div class="curriculum-arrow">↑</div>
+              <div class="curriculum-date-text">Today</div>
+            </div>
+            <div class="curriculum-content">
+              <h5 class="w3-text-teal"><b>Postdoctoral researcher</b><span class="current-badge">Current</span></h5>
+              <h6><i>ICFO - the Institute of Photonic Sciences - Barcelona</i></h6>
+              <p>with Pr. Hugues de Riedmatten</p>
+            </div>
+          </div>
+        </div>
+        <div class="w3-container">
+          <div class="curriculum-item">
+            <div class="curriculum-date">
+              <div class="curriculum-date-text">March 2018</div>
+              <div class="curriculum-arrow">↑</div>
+              <div class="curriculum-date-text">March 2022</div>
+            </div>
+            <div class="curriculum-content">
+              <h5 class="w3-text-teal"><b>PhD thesis</b></h5>
+              <h6><i>LKB - Laboratoire Kastler-Brossel - Paris</i></h6>
+              <p>with Pr. Julien Laurat</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="w3-container w3-card w3-white">
-        <h2 class="w3-text-teal w3-padding-16">Publications</h2>
+      <div class="w3-container w3-card w3-white w3-padding">
+        <div class="section-header">
+          <h5 class="w3-text-teal"><strong>Publications</strong></h5>
+        </div>
         
         <div class="w3-container">
           <div class="publication-card">
@@ -385,9 +691,8 @@ p.just {
               </button>
             </div>
           </div>
-          <hr>
         </div>
-        
+
 
         <div class="w3-container">
           <div class="publication-card">
@@ -401,9 +706,8 @@ p.just {
               </button>
             </div>
           </div>
-          <hr>
         </div>
-        
+
         <div class="w3-container">
           <div class="publication-card">
             <a href="https://journals.aps.org/prxquantum/pdf/10.1103/PRXQuantum.5.030305" target="_blank" class="publication-title">Near-unity indistinguishability of single photons emitted from dissimilar and independent atomic quantum nodes</a>
@@ -415,7 +719,6 @@ p.just {
               </button>
             </div>
           </div>
-          <hr>
         </div>
         <div class="w3-container">
           <div class="publication-card">
@@ -428,7 +731,6 @@ p.just {
               </button>
             </div>
           </div>
-          <hr>
         </div>
         <div class="w3-container">
           <div class="publication-card">
@@ -441,7 +743,6 @@ p.just {
               </button>
             </div>
           </div>
-          <hr>
         </div>
         <div class="w3-container">
           <div class="publication-card">
@@ -454,7 +755,6 @@ p.just {
               </button>
             </div>
           </div>
-          <hr>
         </div>
       </div>
 
