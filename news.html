@@ -131,18 +131,7 @@ body {
 }
 
 html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
-.w3-display-container img {
-  display: block;
-  margin: 0 auto; /* This centers the image horizontally */
-}
-div.b {
-  margin: 8px 0;
-  line-height: 1.4
-}
-p.just {
-	text-align: justify;
-	text-justify: inter-word;
-}
+
 .navbar {
   overflow: hidden;
   background: var(--navbar-bg);
@@ -197,128 +186,105 @@ p.just {
   display: none;
 }
 
-.dropdown {
-  float: left;
-  overflow: hidden;
-}
-
-.dropdown .dropbtn {
-  font-size: 15px;
-  font-weight: 500;
-  border: none;
-  outline: none;
-  color: var(--text-color);
-  padding: 16px 20px;
-  background-color: inherit;
-  font-family: inherit;
-  margin: 0;
-  transition: all 0.3s ease;
-}
-
-.navbar a:hover, .dropdown:hover .dropbtn {
-  color: var(--accent-color);
-  background: transparent;
-}
-
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background: var(--card-bg);
-  min-width: 200px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-  z-index: 1;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  margin-top: 8px;
-  backdrop-filter: blur(20px);
-}
-
-.dropdown-content a {
-  float: none;
-  color: var(--text-color);
-  padding: 12px 20px;
-  text-decoration: none;
-  display: block;
-  text-align: left;
-  transition: all 0.2s ease;
-}
-
-.dropdown-content a:hover {
-  background: var(--accent-gradient);
-  color: white;
-}
-
-.dropdown-content a:first-child:hover {
-  border-radius: 8px 8px 0 0;
-}
-
-.dropdown-content a:last-child:hover {
-  border-radius: 0 0 8px 8px;
-}
-
-.dropdown:hover .dropdown-content {
-  display: block;
-}
-
-/* Notes specific styles */
-.notes-container {
-  max-width: 800px;
+/* News specific styles */
+.news-container {
+  max-width: 1100px;
   margin: 40px auto;
   padding: 20px;
 }
 
-.note-item {
-  padding: 12px 0;
+.news-item {
+  padding: 32px;
   border-bottom: 1px solid var(--border-color);
+  background: var(--card-bg);
+  margin-bottom: 24px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
 }
 
-.note-item:last-child {
-  border-bottom: none;
+.news-item:last-child {
+  margin-bottom: 0;
 }
 
-.note-title {
+.news-date {
+  font-size: 90%;
+  color: var(--teal-color);
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.news-content {
   font-size: 100%;
-  font-weight: 400;
-  color: var(--text-color);
-  display: inline;
-  margin-right: 10px;
+  line-height: 1.6;
+  margin-bottom: 8px;
 }
 
-.note-link {
+.news-content a {
   color: var(--teal-color);
   text-decoration: none;
-  font-size: 90%;
-  transition: opacity 0.2s ease;
+  font-weight: 600;
 }
 
-.note-link:hover {
-  opacity: 0.7;
+.news-content a:hover {
   text-decoration: underline;
+}
+
+.news-image {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.news-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
 }
 </style>
 </head>
 <div class="navbar">
   <a href="index.html">Home</a>
-  <a href="news.html">Latest News</a>
-  <a href="notes.html" class="active">Personal Notes</a>
+  <a href="news.html" class="active">Latest News</a>
+  <a href="notes.html">Personal Notes</a>
   <button class="theme-toggle" onclick="toggleTheme()">
     <i class="fa fa-moon-o"></i>
   </button>
 </div>
 <body class="w3-light-grey">
 
-  <div class="notes-container">
-    <div class="note-item">
-      <span class="note-title">DLCZ cheat sheet</span>
-      <a href="pdf/DLCZ_cheat_sheet.pdf" target="_blank" class="note-link">[PDF]</a>
+  <div class="news-container">
+    <div class="news-item">
+      <div class="news-date">January 2026</div>
+      <div class="news-content">
+        The setup is almost ready!
+      </div>
+      <div class="news-image">
+        <img src="/images/rydberg_photo.jpeg" style="max-width: 600px;" alt="Rydberg photo">
+      </div>
+      <div class="news-image">
+        <img src="/images/dipole_trap.png" style="max-width: 600px;" alt="Dipole trap">
+      </div>
     </div>
 
-    <div class="note-item">
-      <span class="note-title">Notes on crossed optical dipole traps</span>
-      <a href="pdf/Crossed_Dipole_Trap_notes.pdf" target="_blank" class="note-link">[PDF]</a>
+    <div class="news-item">
+      <div class="news-date">April 2025</div>
+      <div class="news-content">
+        Still working on a new state-of-the-art Rydberg superatom setup. We recently installed the vertical optics necessary for the crossed dipole trap and the imaging system.
+      </div>
+      <div class="news-image">
+        <img src="/images/rydberg_setup.jpeg" style="max-width: 400px;" alt="Rydberg setup">
+      </div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-date">March 2025</div>
+      <div class="news-content">
+        Check out my latest <a href="https://arxiv.org/pdf/2503.22354" target="_blank">paper</a> about cavity-enhanced retrieval of collective excitations in atomic ensembles.
+      </div>
+      <div class="news-image">
+        <img src="/images/paper_figure.PNG" style="max-width: 600px;" alt="Paper Figure">
+      </div>
     </div>
   </div>
-
 
 <footer class="w3-container w3-teal w3-center w3-margin-top">
     <p>Cold atoms FTW</p>
@@ -329,10 +295,10 @@ function toggleTheme() {
   const html = document.documentElement;
   const currentTheme = html.getAttribute('data-theme');
   const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-  
+
   html.setAttribute('data-theme', newTheme);
   localStorage.setItem('theme', newTheme);
-  
+
   // Update button state
   const button = document.querySelector('.theme-toggle');
   if (newTheme === 'dark') {
@@ -346,7 +312,7 @@ function toggleTheme() {
 document.addEventListener('DOMContentLoaded', () => {
   const savedTheme = localStorage.getItem('theme') || 'light';
   document.documentElement.setAttribute('data-theme', savedTheme);
-  
+
   // Set initial button state
   const button = document.querySelector('.theme-toggle');
   if (savedTheme === 'dark') {
