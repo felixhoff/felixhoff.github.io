@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cloud Whisper | Felix Hoffet</title>
+    <meta name="description" content="Cloud Whisper simulation webapp" />
+    <meta name="author" content="Felix Hoffet" />
+    <style>
+      :root[data-theme="light"] {
+        --navbar-bg: #009688;
+        --navbar-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        --border-color: #ddd;
+        --card-bg: #fff;
+        --accent-gradient: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%);
+      }
+
+      :root[data-theme="dark"] {
+        --navbar-bg: #1a2332;
+        --navbar-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        --border-color: #404040;
+        --card-bg: #2d2d2d;
+        --accent-gradient: linear-gradient(135deg, #ff8787 0%, #ffa5a5 100%);
+      }
+
+      body {
+        margin: 0;
+      }
+
+      .site-navbar {
+        overflow: hidden;
+        background: var(--navbar-bg);
+        backdrop-filter: blur(20px);
+        box-shadow: var(--navbar-shadow);
+        position: sticky;
+        top: 0;
+        z-index: 2000;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .site-navbar a {
+        float: left;
+        font-size: 15px;
+        font-weight: 500;
+        color: #fff;
+        text-align: center;
+        padding: 16px 20px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      .site-navbar a.active {
+        background: rgba(0, 150, 136, 0.15);
+        border-bottom: 3px solid #fff;
+      }
+
+      :root[data-theme="dark"] .site-navbar a.active {
+        background: rgba(0, 191, 165, 0.2);
+      }
+
+      .site-navbar a::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 3px;
+        background: var(--accent-gradient);
+        transform: translateX(-50%);
+        transition: all 0.3s ease;
+        border-radius: 3px 3px 0 0;
+      }
+
+      .site-navbar a:hover::after {
+        width: 80%;
+      }
+
+      .site-navbar a.active::after {
+        display: none;
+      }
+
+      .site-theme-toggle {
+        float: right;
+        padding: 10px 14px;
+        color: #111;
+        cursor: pointer;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        margin: 8px 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .site-theme-toggle:hover {
+        background: var(--accent-gradient);
+        color: #fff;
+        border-color: transparent;
+      }
+
+      .site-theme-toggle.active {
+        background: var(--accent-gradient);
+        color: #fff;
+        border-color: transparent;
+      }
+
+      #root {
+        min-height: calc(100vh - 60px);
+      }
+
+      @media (max-width: 720px) {
+        .site-navbar a {
+          padding: 12px 14px;
+          font-size: 14px;
+        }
+
+        .site-theme-toggle {
+          margin: 6px 8px;
+          padding: 8px 10px;
+        }
+      }
+    </style>
+    <script type="module" crossorigin src="./assets/index-BNipgxoM.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-Bz-w7BJ1.css" />
+  </head>
+
+  <body>
+    <div class="site-navbar">
+      <a href="../index.html">Home</a>
+      <a href="../news.html">Latest News</a>
+      <a href="../notes.html">Personal Notes</a>
+      <a href="./" class="active">Cloud Whisper</a>
+      <button class="site-theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle theme">
+        &#9789;
+      </button>
+    </div>
+    <div id="root"></div>
+
+    <script>
+      function updateThemeToggle(theme) {
+        var button = document.querySelector(".site-theme-toggle");
+        if (!button) return;
+        button.innerHTML = theme === "dark" ? "&#9728;" : "&#9789;";
+        button.classList.toggle("active", theme === "dark");
+      }
+
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        localStorage.setItem("theme", theme);
+        updateThemeToggle(theme);
+      }
+
+      function toggleTheme() {
+        var currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+        var nextTheme = currentTheme === "light" ? "dark" : "light";
+        applyTheme(nextTheme);
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        var savedTheme = localStorage.getItem("theme") || "light";
+        applyTheme(savedTheme);
+      });
+    </script>
+  </body>
+</html>
