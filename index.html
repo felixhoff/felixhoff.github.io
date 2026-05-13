@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-theme="light">
+<html data-theme="cold-atoms">
 <head>
 
 <title>Felix Hoffet webpage</title>
@@ -10,7 +10,8 @@
 <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto'>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
-:root[data-theme="light"] {
+:root[data-theme="light"],
+:root[data-theme="cold-atoms"] {
   --bg-color: #f1f1f1;
   --text-color: #333;
   --card-bg: #fff;
@@ -19,11 +20,45 @@
   --accent-gradient: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%);
   --teal-color: #009688;
   --teal-gradient: linear-gradient(135deg, #009688 0%, #00bfa5 100%);
+  --teal-contrast: #fff;
+  --theme-soft-bg: rgba(0, 150, 136, 0.05);
   --navbar-bg: #009688;
+  --navbar-text-color: #fff;
+  --navbar-active-bg: rgba(255, 255, 255, 0.15);
+  --navbar-active-border: #fff;
   --navbar-shadow: 0 2px 20px rgba(0,0,0,0.1);
+  --theme-selector-bg: rgba(255,255,255,0.14);
+  --theme-selector-border: rgba(255,255,255,0.28);
+  --theme-option-color: #fff;
+  --theme-option-active-bg: #fff;
+  --theme-option-active-color: #00796b;
 }
 
-:root[data-theme="dark"] {
+:root[data-theme="pr-yso"] {
+  --bg-color: #fff8e8;
+  --text-color: #2a2430;
+  --card-bg: #fffdf8;
+  --border-color: #F8CB63;
+  --accent-color: #F863AB;
+  --accent-gradient: linear-gradient(135deg, #27C8F5 0%, #F863AB 100%);
+  --teal-color: #b87900;
+  --teal-gradient: linear-gradient(135deg, #F8CB63 0%, #27C8F5 100%);
+  --teal-contrast: #2a2430;
+  --theme-soft-bg: rgba(248, 203, 99, 0.25);
+  --navbar-bg: #F8CB63;
+  --navbar-text-color: #2a2430;
+  --navbar-active-bg: rgba(255,255,255,0.32);
+  --navbar-active-border: #F863AB;
+  --navbar-shadow: 0 2px 20px rgba(248, 203, 99, 0.28);
+  --theme-selector-bg: rgba(255,255,255,0.35);
+  --theme-selector-border: rgba(42,36,48,0.18);
+  --theme-option-color: #2a2430;
+  --theme-option-active-bg: #fffdf8;
+  --theme-option-active-color: #b87900;
+}
+
+:root[data-theme="dark"],
+:root[data-theme="antimatter"] {
   --bg-color: #121212;
   --text-color: #f1f1f1;
   --card-bg: #2d2d2d;
@@ -32,8 +67,18 @@
   --accent-gradient: linear-gradient(135deg, #ff8787 0%, #ffa5a5 100%);
   --teal-color: #00bfa5;
   --teal-gradient: linear-gradient(135deg, #00bfa5 0%, #1de9b6 100%);
+  --teal-contrast: #121212;
+  --theme-soft-bg: rgba(0, 191, 165, 0.08);
   --navbar-bg: #1a2332;
+  --navbar-text-color: #fff;
+  --navbar-active-bg: rgba(0, 191, 165, 0.2);
+  --navbar-active-border: #fff;
   --navbar-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  --theme-selector-bg: rgba(255,255,255,0.08);
+  --theme-selector-border: rgba(255,255,255,0.16);
+  --theme-option-color: #f1f1f1;
+  --theme-option-active-bg: #2d2d2d;
+  --theme-option-active-color: #1de9b6;
 }
 
 body {
@@ -42,7 +87,8 @@ body {
   transition: background-color 0.3s, color 0.3s;
 }
 
-:root[data-theme="light"] body {
+:root[data-theme="light"] body,
+:root[data-theme="cold-atoms"] body {
   background-image:
     repeating-linear-gradient(
       0deg,
@@ -60,7 +106,26 @@ body {
     );
 }
 
-:root[data-theme="dark"] body {
+:root[data-theme="pr-yso"] body {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 35px,
+      rgba(248, 203, 99, 0.08) 35px,
+      rgba(248, 203, 99, 0.08) 70px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 35px,
+      rgba(39, 200, 245, 0.05) 35px,
+      rgba(39, 200, 245, 0.05) 70px
+    );
+}
+
+:root[data-theme="dark"] body,
+:root[data-theme="antimatter"] body {
   background-image:
     repeating-linear-gradient(
       0deg,
@@ -94,32 +159,93 @@ body {
   overflow: hidden !important;
 }
 
-.theme-toggle {
+.w3-text-teal {
+  color: var(--teal-color) !important;
+}
+
+.w3-teal {
+  background-color: var(--teal-color) !important;
+  color: var(--teal-contrast) !important;
+}
+
+.theme-selector {
   float: right;
-  padding: 10px 14px;
-  color: var(--text-color);
-  cursor: pointer;
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  font-size: 16px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
   margin: 8px 12px;
+  background: var(--theme-selector-bg);
+  border: 1px solid var(--theme-selector-border);
+  border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.theme-toggle:hover {
-  background: var(--accent-gradient);
-  color: white;
-  border-color: transparent;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+.theme-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  min-height: 32px;
+  padding: 0 9px;
+  color: var(--theme-option-color);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-.theme-toggle.active {
-  background: var(--accent-gradient);
-  color: white;
-  border-color: transparent;
+.theme-option:hover {
+  background: rgba(255,255,255,0.16);
+}
+
+.theme-option.active {
+  background: var(--theme-option-active-bg);
+  color: var(--theme-option-active-color);
+  border-color: var(--border-color);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.14);
+}
+
+.theme-option:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.theme-option sup {
+  font-size: 70%;
+  line-height: 0;
+}
+
+@media (max-width: 680px) {
+  .navbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .navbar a {
+    float: none;
+  }
+
+  .theme-selector {
+    float: none;
+    width: calc(100% - 24px);
+    justify-content: space-between;
+    margin-top: 0;
+  }
+
+  .theme-option {
+    flex: 1 1 0;
+    width: auto;
+    justify-content: center;
+    padding: 0 6px;
+  }
 }
 
 html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
@@ -151,7 +277,7 @@ p.just {
   float: left;
   font-size: 15px;
   font-weight: 500;
-  color: white;
+  color: var(--navbar-text-color);
   text-align: center;
   padding: 16px 20px;
   text-decoration: none;
@@ -160,12 +286,8 @@ p.just {
 }
 
 .navbar a.active {
-  background: rgba(0, 150, 136, 0.15);
-  border-bottom: 3px solid white;
-}
-
-:root[data-theme="dark"] .navbar a.active {
-  background: rgba(0, 191, 165, 0.2);
+  background: var(--navbar-active-bg);
+  border-bottom: 3px solid var(--navbar-active-border);
 }
 
 .navbar a::after {
@@ -462,7 +584,7 @@ p.just {
   justify-content: center;
   gap: 8px;
   padding: 12px;
-  background: rgba(0, 150, 136, 0.05);
+  background: var(--theme-soft-bg);
   border-radius: 8px;
 }
 
@@ -515,7 +637,7 @@ p.just {
 
 /* Section headers for right column cards */
 .section-header {
-  background: rgba(0, 150, 136, 0.05);
+  background: var(--theme-soft-bg);
   padding: 12px 16px 10px 16px;
   margin: -16px -16px 16px -16px;
   border-radius: 8px 8px 0 0;
@@ -533,9 +655,10 @@ p.just {
 <div class="navbar">
   <a href="index.html" class="active">Home</a>
   <a href="notes.html">Personal Notes</a>
-  <button class="theme-toggle" onclick="toggleTheme()">
-    <i class="fa fa-moon-o"></i>
-  </button>
+  <div class="theme-selector" role="group" aria-label="Theme">
+    <button type="button" class="theme-option active" data-theme-option="cold-atoms" onclick="setTheme('cold-atoms')" aria-pressed="true"><sup>87</sup>Rb</button>
+    <button type="button" class="theme-option" data-theme-option="pr-yso" onclick="setTheme('pr-yso')" aria-pressed="false">Pr<sup>3+</sup>:YSO</button>
+  </div>
 </div>
 <body class="w3-light-grey">
 
@@ -747,33 +870,32 @@ p.just {
 <div class="citation-tooltip" id="citationTooltip">Citation copied!</div>
 
 <script>
-function toggleTheme() {
-  const html = document.documentElement;
-  const currentTheme = html.getAttribute('data-theme');
-  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-  
-  html.setAttribute('data-theme', newTheme);
-  localStorage.setItem('theme', newTheme);
-  
-  // Update button state
-  const button = document.querySelector('.theme-toggle');
-  if (newTheme === 'dark') {
-    button.classList.add('active');
-  } else {
-    button.classList.remove('active');
-  }
+const themeAliases = {
+  light: 'cold-atoms',
+  dark: 'cold-atoms',
+  antimatter: 'cold-atoms'
+};
+const availableThemes = ['cold-atoms', 'pr-yso'];
+
+function normalizeTheme(theme) {
+  const normalizedTheme = themeAliases[theme] || theme;
+  return availableThemes.includes(normalizedTheme) ? normalizedTheme : 'cold-atoms';
 }
 
-// Check for saved theme preference
+function setTheme(theme) {
+  const selectedTheme = normalizeTheme(theme);
+  document.documentElement.setAttribute('data-theme', selectedTheme);
+  localStorage.setItem('theme', selectedTheme);
+
+  document.querySelectorAll('.theme-option').forEach((button) => {
+    const isActive = button.dataset.themeOption === selectedTheme;
+    button.classList.toggle('active', isActive);
+    button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  const savedTheme = localStorage.getItem('theme') || 'light';
-  document.documentElement.setAttribute('data-theme', savedTheme);
-  
-  // Set initial button state
-  const button = document.querySelector('.theme-toggle');
-  if (savedTheme === 'dark') {
-    button.classList.add('active');
-  }
+  setTheme(localStorage.getItem('theme') || document.documentElement.getAttribute('data-theme'));
 });
 
 // Back to top button functionality
