@@ -222,6 +222,73 @@ body {
   line-height: 0;
 }
 
+.contact-links {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin-bottom: 12px;
+}
+
+.contact-link {
+  display: inline-flex;
+  align-items: center;
+  width: 260px;
+  margin: 8px 0;
+  line-height: 1.4;
+}
+
+.contact-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 42px;
+  width: 42px;
+}
+
+.contact-link-text {
+  display: inline-block;
+  flex: 1 1 auto;
+  text-align: center;
+}
+
+.profile-links {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.profile-links a {
+  color: var(--teal-color);
+  text-decoration: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.profile-links a:hover,
+.profile-links a:focus {
+  color: var(--accent-color);
+  text-decoration: underline;
+}
+
+.profile-links a:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.orcid-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: var(--teal-color);
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: -0.15em;
+}
+
 @media (max-width: 680px) {
   .navbar {
     display: flex;
@@ -682,10 +749,26 @@ p.just {
     <div class="w3-container">
       <div class="w3-container w3-center">
         <h5>Experimentalist physicist on quantum technologies</h5>
-        <p class="w3-text-teal">
-          <i class="fa fa-envelope fa-fw w3-margin-right w3-large w3-text-teal"></i>
-          felix.hoffet@arqtech.eu
-        </p>
+        <div class="contact-links">
+          <div class="contact-link w3-text-teal">
+            <span class="contact-icon"><i class="fa fa-envelope fa-fw w3-large w3-text-teal"></i></span>
+            <span class="contact-link-text">felix.hoffet@arqtech.eu</span>
+          </div>
+          <div class="profile-links" aria-label="Academic and professional profiles">
+            <div class="contact-link w3-text-teal">
+              <span class="contact-icon"><span class="orcid-mark" aria-hidden="true">iD</span></span>
+              <span class="contact-link-text"><a href="https://orcid.org/0009-0009-2961-4595" target="_blank" rel="noopener noreferrer">ORCID</a></span>
+            </div>
+            <div class="contact-link w3-text-teal">
+              <span class="contact-icon"><i class="fa fa-google fa-fw w3-large w3-text-teal"></i></span>
+              <span class="contact-link-text"><a href="https://scholar.google.com/citations?user=GqM96ysAAAAJ&amp;hl=fr" target="_blank" rel="noopener noreferrer">Google Scholar</a></span>
+            </div>
+            <div class="contact-link w3-text-teal">
+              <span class="contact-icon"><i class="fa fa-linkedin fa-fw w3-large w3-text-teal"></i></span>
+              <span class="contact-link-text"><a href="https://www.linkedin.com/in/f%C3%A9lix-hoffet-057390112/" target="_blank" rel="noopener noreferrer">LinkedIn</a></span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
