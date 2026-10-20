@@ -1,8 +1,11 @@
 # Cigs
 
-A tiny cigarette counter that lives on your phone. Open it, tap the disk once,
-put the phone away. Every cigarette is stored with its exact time; from that the
-app shows today's count, a per-day history and simple statistics.
+A tiny cigarette (and spliff) counter that lives on your phone. Open it, tap
+the disk once, put the phone away. Every cigarette is stored with its exact
+time; from that the app shows today's count, a per-day history and simple
+statistics. A toggle at the top right switches to **spliff mode**: the screens
+turn light green, the disk shows a hand-rolled spliff, and the counts and
+statistics are kept completely separate from the cigarettes.
 
 No account, no server, no cloud. Everything stays in the phone's browser
 storage. It is a Progressive Web App served from
@@ -25,6 +28,10 @@ each have their own storage.
 - **Main screen**: tap the big disk to log a cigarette. The count updates,
   the cigarette burns down, and an **Undo** button stays for five seconds in
   case the tap was a mistake. Taps closer than 1.5 s apart are ignored.
+- **Cigarettes / spliffs toggle** (top right, on both screens): switches
+  everything to the other list. The app remembers the last mode. Each mode
+  has its own entries, so the Today list, Stats and Timeline show only the
+  cigarettes or only the spliffs, with the same panels and layout.
 - **Statistics** (bar-chart button, top left):
   - **Today** lists the day's cigarettes, newest first, with the gap since the
     previous one. Swipe a row left (or press and hold) to delete it. The
@@ -36,7 +43,8 @@ each have their own storage.
     the previous period, and the lowest and highest day in the range. Tap a
     bar for its count; **Open** jumps to that day.
 - **Settings** (bottom of the Statistics screen): export and import a
-  backup, turn the click sound off, delete all data.
+  backup (both lists), turn the click sound off, delete all data (both
+  lists).
 
 ### How the numbers are computed
 
@@ -63,11 +71,16 @@ backup now and then:
 To restore, or to merge two phones: **Settings → Import backup** and pick the
 file. Entries already present are skipped, so importing twice is harmless.
 
-The backup is plain JSON, one ISO 8601 timestamp per cigarette:
+The backup is plain JSON, one ISO 8601 timestamp per cigarette (`entries`)
+and per spliff (`spliffs`):
 
 ```json
-{ "app": "cigs", "version": 1, "entries": ["2026-10-20T16:42:11+02:00", "..."] }
+{ "app": "cigs", "version": 2,
+  "entries": ["2026-10-20T16:42:11+02:00", "..."],
+  "spliffs": ["2026-10-20T22:05:40+02:00", "..."] }
 ```
+
+Older version 1 backups (cigarettes only) import fine.
 
 ## Files
 
@@ -85,8 +98,9 @@ cigs/
   tools/test-stats.js    checks for stats.js
 ```
 
-Data is stored under the localStorage key `cigs.entries` as a sorted JSON
-array of timestamps; `cigs.sound` holds the sound setting.
+Data is stored under the localStorage keys `cigs.entries` (cigarettes) and
+`cigs.spliffs` (spliffs) as sorted JSON arrays of timestamps; `cigs.mode`
+remembers the toggle (`cig` or `spliff`) and `cigs.sound` the sound setting.
 
 ## Development
 
@@ -99,9 +113,10 @@ node cigs/tools/test-stats.js   # statistics checks
 python cigs/tools/make-icons.py # regenerate icons (needs Pillow)
 ```
 
-In the browser console, `cigs.seedDemoData(60)` **replaces** all data with
-60 days of generated history, handy for looking at the statistics screens.
-`cigs.entries()` returns the current list.
+In the browser console, `cigs.seedDemoData(60)` **replaces** the data of the
+current mode with 60 days of generated history, handy for looking at the
+statistics screens. `cigs.entries()` returns the current mode's list and
+`cigs.setMode('spliff')` / `cigs.setMode('cig')` switches the toggle.
 
 ### Releasing a change
 

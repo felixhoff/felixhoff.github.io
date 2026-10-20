@@ -1,33 +1,51 @@
-/* app.js — Cigs UI and data layer. */
+/* app.js — Cigs UI and data layer (cigarettes and spliffs, two separate lists). */
 (function () {
   'use strict';
 
   const S = window.CigStats;
-  const STORAGE_KEY = 'cigs.entries';
+  const STORAGE_KEYS = { cig: 'cigs.entries', spliff: 'cigs.spliffs' };
+  const MODE_KEY = 'cigs.mode';
   const SOUND_KEY = 'cigs.sound';
+  const MODES = ['cig', 'spliff'];
+  const NOUN = { cig: 'cigarette', spliff: 'spliff' };
+  const NOUNS = { cig: 'cigarettes', spliff: 'spliffs' };
   const $ = (sel, root) => (root || document).querySelector(sel);
   const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
   const REDUCED_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // =====================================================================
-  // Data layer: one ISO timestamp per cigarette, kept sorted, write-through
+  // Data layer: one ISO timestamp per cigarette or spliff, kept sorted,
+  // write-through. Cigarettes and spliffs are two separate lists; `entries`
+  // and `dates` always point at the list of the current mode.
   // =====================================================================
 
-  let entries = [];   // ISO strings, ascending
-  let dates = [];     // same entries as Date objects
+  const lists = { cig: [], spliff: [] };   // ISO strings, ascending, per mode
+  let mode = 'cig';                        // 'cig' | 'spliff'
+  let entries = lists.cig;                 // the list of the current mode
+  let dates = [];                          // same entries as Date objects
 
   function loadEntries() {
-    let list = [];
-    try { list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch (e) { list = []; }
-    entries = Array.isArray(list) ? list.filter(S.isValidISO) : [];
-    sortEntries();
+    MODES.forEach((m) => {
+      let list = [];
+      try { list = JSON.parse(localStorage.getItem(STORAGE_KEYS[m]) || '[]'); } catch (e) { list = []; }
+      lists[m] = Array.isArray(list) ? list.filter(S.isValidISO) : [];
+      lists[m].sort((a, b) => Date.parse(a) - Date.parse(b));
+    });
+    let m = 'cig';
+    try { m = localStorage.getItem(MODE_KEY) || 'cig'; } catch (e) { /* default */ }
+    activate(MODES.indexOf(m) >= 0 ? m : 'cig');
+  }
+  function activate(m) {
+    mode = m;
+    entries = lists[m];
+    dates = entries.map((s) => new Date(s));
   }
   function sortEntries() {
     entries.sort((a, b) => Date.parse(a) - Date.parse(b));
     dates = entries.map((s) => new Date(s));
   }
   function persist() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
+    try { localStorage.setItem(STORAGE_KEYS[mode], JSON.stringify(entries)); }
     catch (e) { toast('Could not save: storage is full'); }
   }
   function addEntry(date) {
@@ -47,27 +65,68 @@
     render();
     return true;
   }
-  // Adds entries that are not already present (compared by instant). Returns the number added.
-  function mergeEntries(list) {
-    const have = new Set(entries.map((s) => Date.parse(s)));
+  // Adds entries that are not already present (compared by instant) to the
+  // list of mode `m` (the current mode by default). Returns the number added.
+  function mergeEntries(list, m) {
+    m = m || mode;
+    const target = lists[m];
+    const have = new Set(target.map((s) => Date.parse(s)));
     let added = 0;
     for (const s of list) {
       if (!S.isValidISO(s)) continue;
       const t = Date.parse(s);
       if (have.has(t)) continue;
       have.add(t);
-      entries.push(s);
+      target.push(s);
       added++;
     }
-    if (added) { sortEntries(); persist(); render(); }
+    if (added) {
+      target.sort((a, b) => Date.parse(a) - Date.parse(b));
+      try { localStorage.setItem(STORAGE_KEYS[m], JSON.stringify(target)); }
+      catch (e) { toast('Could not save: storage is full'); }
+      if (m === mode) { activate(mode); render(); }
+    }
     return added;
   }
-  function replaceEntries(list) {
-    entries = list.filter(S.isValidISO);
-    sortEntries();
-    persist();
+  function replaceEntries(list, m) {
+    m = m || mode;
+    lists[m] = list.filter(S.isValidISO);
+    lists[m].sort((a, b) => Date.parse(a) - Date.parse(b));
+    try { localStorage.setItem(STORAGE_KEYS[m], JSON.stringify(lists[m])); }
+    catch (e) { toast('Could not save: storage is full'); }
+    if (m === mode) { activate(mode); render(); }
+  }
+
+  // =====================================================================
+  // Mode: cigarettes or spliffs (the toggle at the top right)
+  // =====================================================================
+
+  const modeToggles = $$('[data-mode-toggle]');
+  const themeLight = $('#theme-light');
+  const themeDark = $('#theme-dark');
+  const THEME = { cig: ['#CFE3F5', '#13202E'], spliff: ['#D6EFDA', '#122419'] };
+
+  function setMode(m, opts) {
+    if (MODES.indexOf(m) < 0) return;
+    const changed = m !== mode;
+    activate(m);
+    try { localStorage.setItem(MODE_KEY, m); } catch (e) { /* remembered only for this visit */ }
+    if (m === 'spliff') document.documentElement.setAttribute('data-mode', 'spliff');
+    else document.documentElement.removeAttribute('data-mode');
+    if (themeLight) themeLight.setAttribute('content', THEME[m][0]);
+    if (themeDark) themeDark.setAttribute('content', THEME[m][1]);
+    modeToggles.forEach((b) => b.setAttribute('aria-checked', String(m === 'spliff')));
+    if (changed && !(opts && opts.silent)) {
+      hideUndo();
+      hideToast();
+      ui.tooltip = null;
+      ui.day = null;
+      cancelAnimationFrame(burnRaf);
+      MODES.forEach((x) => setBurn(0, 0, art[x]));
+    }
     render();
   }
+  modeToggles.forEach((b) => b.addEventListener('click', () => setMode(mode === 'cig' ? 'spliff' : 'cig')));
 
   // =====================================================================
   // UI state
@@ -92,26 +151,35 @@
   // =====================================================================
 
   const mainCount = $('#main-count');
-  const mainDate = $('#main-date');
   const mainLast = $('#main-last');
   const glyphs = $('#glyphs');
   const disk = $('#btn-log');
   const undoBtn = $('#btn-undo');
 
-  const GLYPH = '<svg class="glyph" viewBox="0 0 18 8" aria-hidden="true">' +
-    '<rect class="glyph-filter" x="0" y="1" width="5" height="6" rx="1.5"/>' +
-    '<rect class="glyph-body" x="5" y="1" width="10.5" height="6"/>' +
-    '<rect class="glyph-tip" x="15" y="1" width="3" height="6" rx="1.5"/></svg>';
+  const GLYPH = {
+    cig: '<svg class="glyph" viewBox="0 0 18 8" aria-hidden="true">' +
+      '<rect class="glyph-filter" x="0" y="1" width="5" height="6" rx="1.5"/>' +
+      '<rect class="glyph-body" x="5" y="1" width="10.5" height="6"/>' +
+      '<rect class="glyph-tip" x="15" y="1" width="3" height="6" rx="1.5"/></svg>',
+    spliff: '<svg class="glyph" viewBox="0 0 18 8" aria-hidden="true">' +
+      '<rect class="glyph-roach" x="0" y="2" width="4" height="4" rx="1"/>' +
+      '<path class="glyph-cone" d="M4 2 L14 0 L14 8 L4 6 Z"/>' +
+      '<path class="glyph-tip" d="M14 0.5 L18 3 L18 5 L14 7.5 Z"/></svg>',
+  };
 
   function renderMain() {
     const now = new Date();
-    mainDate.textContent = S.fmtDayLong(now);
     const todays = S.dayEntries(dates, now);
     setCount(mainCount, todays.length);
-    glyphs.innerHTML = GLYPH.repeat(todays.length);
+    glyphs.innerHTML = GLYPH[mode].repeat(todays.length);
     mainLast.textContent = todays.length
       ? 'last one at ' + S.fmtTime(todays[todays.length - 1].date)
-      : 'no cigarette yet';
+      : 'no ' + NOUN[mode] + ' yet';
+    disk.setAttribute('aria-label', 'Log a ' + NOUN[mode]);
+    MODES.forEach((m) => {   // SVG elements have no `hidden` property, so use the attribute
+      if (m === mode) art[m].svg.removeAttribute('hidden');
+      else art[m].svg.setAttribute('hidden', '');
+    });
   }
 
   let countAnim = null;
@@ -172,24 +240,32 @@
     );
   }
 
-  // --- the cigarette burns itself ---
-  const cig = {
-    clip: $('#cig-clip-rect'),
-    tip: $('#cig-tip'),
-    cap: $('#cig-cap'),
-    ember: $('#cig-ember'),
-    glow: $('#cig-glow'),
-    ash: $('#cig-ash'),
-    ashBits: $$('.cig-ashbit'),
-    smoke: $('#cig-smoke'),
-  };
+  // --- the cigarette (or spliff) burns itself ---
+  function parts(prefix) {
+    return {
+      svg: $('#art-' + prefix),
+      clip: $('#' + prefix + '-clip-rect'),
+      tip: $('#' + prefix + '-tip'),
+      cap: $('#' + prefix + '-cap'),
+      ember: $('#' + prefix + '-ember'),
+      glow: $('#' + prefix + '-glow'),
+      ash: $('#' + prefix + '-ash'),
+      ashBits: $$('.' + prefix + '-ashbit'),
+      smoke: $('#' + prefix + '-smoke'),
+    };
+  }
+  const art = { cig: parts('cig'), spliff: parts('spliff') };
   const BURN_MS = 1200;
-  const BODY_END = 188;    // right edge of the white body (unrotated SVG units)
+  const BODY_END = 188;    // right edge of the body (unrotated SVG units)
   const TRAVEL = 84;       // how far the tip moves toward the filter
+  // the spliff is a cone: its lit end shrinks as it burns toward the roach
+  const CONE_WIDE = 20;    // half-height of the cone at the lit end
+  const CONE_NARROW = 9;   // half-height at the roach
   let burnRaf = 0;
 
   function startBurn() {
     cancelAnimationFrame(burnRaf);
+    MODES.forEach((m) => { if (m !== mode) setBurn(0, 0, art[m]); });
     if (REDUCED_MOTION) {
       setBurn(0, 0.5);
       setTimeout(() => setBurn(0, 0), 200);
@@ -207,10 +283,16 @@
   }
 
   // d: distance the tip has travelled; t: 0..1 progress (0 = idle)
-  function setBurn(d, t) {
+  function setBurn(d, t, cig) {
+    cig = cig || art[mode];
     const glow = Math.sin(Math.PI * t);                // rises then settles
     cig.clip.setAttribute('width', BODY_END - d);
-    cig.tip.setAttribute('transform', 'translate(' + (-d) + ' 0)');
+    let tf = 'translate(' + (-d) + ' 0)';
+    if (cig === art.spliff) {
+      const k = (CONE_WIDE - (CONE_WIDE - CONE_NARROW) * (d / (BODY_END - 96))) / CONE_WIDE;
+      tf += ' translate(' + BODY_END + ' 130) scale(' + k.toFixed(4) + ') translate(' + (-BODY_END) + ' -130)';
+    }
+    cig.tip.setAttribute('transform', tf);
     cig.glow.setAttribute('opacity', (0.9 * glow).toFixed(3));
     cig.ember.setAttribute('r', (5.5 + 3 * glow).toFixed(2));
     cig.ember.setAttribute('fill', glow > 0.35 ? '#FFF2A8' : '#FFD36B');
@@ -349,7 +431,7 @@
         '<button class="nav-btn" id="day-next" type="button" aria-label="Next day"' + (isToday ? ' disabled' : '') + '>' + CHEVRON_R + '</button>' +
       '</div>' +
       '<div class="big-count">' + list.length + '</div>' +
-      '<div class="big-label">' + (isToday ? 'cigarettes today' : 'cigarettes on ' + S.fmtDayShort(day)) + '</div>';
+      '<div class="big-label">' + NOUNS[mode] + (isToday ? ' today' : ' on ' + S.fmtDayShort(day)) + '</div>';
 
     if (sum.days >= 7 && sum.avgPerDay !== null) {
       const diff = list.length - sum.avgPerDay;
@@ -468,7 +550,7 @@
     const show = (x, fmt) => (x === null ? '–' : fmt(x));
     const tiles = [
       [show(sum.avgPerDay, S.fmt1), 'avg per day'],
-      [show(sum.avgFirst, S.fmtMinutes), 'avg first cigarette'],
+      [show(sum.avgFirst, S.fmtMinutes), 'avg first ' + NOUN[mode]],
       [show(sum.weekdayAvg, S.fmt1), 'weekdays'],
       [show(sum.weekendAvg, S.fmt1), 'weekends'],
     ];
@@ -621,8 +703,12 @@
     sheet.setAttribute('aria-hidden', 'true');
   }
   function updateSettingsInfo() {
-    const n = entries.length;
-    $('#export-sub').textContent = n ? n + (n === 1 ? ' entry' : ' entries') + ' since ' + S.fmtDayShort(dates[0]) : 'no entries yet';
+    const nc = lists.cig.length;
+    const ns = lists.spliff.length;
+    const first = [lists.cig[0], lists.spliff[0]].filter(Boolean).sort((a, b) => Date.parse(a) - Date.parse(b))[0];
+    $('#export-sub').textContent = nc + ns
+      ? nc + (nc === 1 ? ' cigarette' : ' cigarettes') + ' · ' + ns + (ns === 1 ? ' spliff' : ' spliffs') + ' since ' + S.fmtDayShort(new Date(first))
+      : 'no entries yet';
   }
   $('#btn-settings').addEventListener('click', openSheet);
   $('#btn-sheet-close').addEventListener('click', closeSheet);
@@ -634,7 +720,7 @@
   $('#btn-export').addEventListener('click', exportBackup);
   function exportBackup() {
     const name = 'cigs-backup-' + S.dayKey(new Date()) + '.json';
-    const payload = { app: 'cigs', version: 1, exportedAt: S.toLocalISO(new Date()), entries: entries };
+    const payload = { app: 'cigs', version: 2, exportedAt: S.toLocalISO(new Date()), entries: lists.cig, spliffs: lists.spliff };
     const blob = new Blob([JSON.stringify(payload, null, 1)], { type: 'application/json' });
     const download = () => {
       const a = document.createElement('a');
@@ -663,9 +749,11 @@
     file.text().then((text) => {
       let data = null;
       try { data = JSON.parse(text); } catch (e) { /* handled below */ }
-      const list = Array.isArray(data) ? data : data && Array.isArray(data.entries) ? data.entries : null;
-      if (!list) { toast('That file is not a Cigs backup'); return; }
-      const added = mergeEntries(list);
+      // version 1 backups: a list (or {entries}) of cigarettes; version 2 adds {spliffs}
+      const cigList = Array.isArray(data) ? data : data && Array.isArray(data.entries) ? data.entries : null;
+      const spliffList = data && !Array.isArray(data) && Array.isArray(data.spliffs) ? data.spliffs : [];
+      if (!cigList) { toast('That file is not a Cigs backup'); return; }
+      const added = mergeEntries(cigList, 'cig') + mergeEntries(spliffList, 'spliff');
       closeSheet();
       toast(added ? 'Imported ' + added + (added === 1 ? ' new entry' : ' new entries') : 'Nothing new in that backup');
     }).catch(() => toast('Could not read that file'));
@@ -680,7 +768,7 @@
   deleteInput.addEventListener('input', () => { deleteBtn.disabled = deleteInput.value.trim() !== 'DELETE'; });
   deleteBtn.addEventListener('click', () => {
     if (deleteInput.value.trim() !== 'DELETE') return;
-    replaceEntries([]);
+    MODES.forEach((m) => replaceEntries([], m));
     ui.day = null;
     closeSheet();
     toast('All data deleted');
@@ -710,7 +798,7 @@
   // =====================================================================
 
   loadEntries();
-  render();
+  setMode(mode, { silent: true });
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -722,6 +810,7 @@
   //   cigs.seedDemoData(60)  replaces all data with 60 days of generated history
   window.cigs = {
     entries: () => entries.slice(),
+    mode: () => mode, setMode: setMode,
     add: addEntry, remove: removeEntry, merge: mergeEntries, replace: replaceEntries,
     seedDemoData: (days, seed) => { replaceEntries(S.generateDemoEntries(new Date(), days, seed)); return entries.length; },
   };

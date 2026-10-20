@@ -64,6 +64,52 @@
   }
 }
 
+/* ---------- spliff mode: the same screens in light green ---------- */
+:root[data-mode="spliff"] {
+  --bg: #D6EFDA;
+  --text: #1E4A30;
+  --text-2: rgba(30, 74, 48, 0.78);
+  --disk: #ECF8EE;
+  --disk-shadow: 0 18px 40px rgba(30, 74, 48, 0.14);
+  --card-solid: #E8F5EA;
+  --track: rgba(30, 74, 48, 0.10);
+  --line: rgba(30, 74, 48, 0.08);
+  --bar: #1E4A30;
+  --smoke: #9CC4A6;
+  --ash: #B8C9BC;
+  --cig-outline: #1E4A30;
+  --sheet: #E8F5EA;
+  --range-bg: #1E4A30;
+  --toast-bg: #1E4A30;
+  --paper: #F8F3E6;
+  --roach: #D2B183;
+  --roach-lines: #8F6B3A;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-mode="spliff"] {
+    --bg: #122419;
+    --text: #E3F2E7;
+    --text-2: rgba(227, 242, 231, 0.72);
+    --disk: #1D3626;
+    --disk-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+    --card-solid: #24382C;
+    --track: rgba(255, 255, 255, 0.1);
+    --line: rgba(255, 255, 255, 0.08);
+    --bar: #E3F2E7;
+    --smoke: #6FA383;
+    --ash: #8FA896;
+    --cig-outline: #0C1A11;
+    --sheet: #1A2E21;
+    --range-bg: #E3F2E7;
+    --range-text: #122419;
+    --toast-bg: #E3F2E7;
+    --toast-text: #122419;
+    --paper: #F1EBDA;
+    --roach: #C7A574;
+    --roach-lines: #7A5A2E;
+  }
+}
+
 /* ---------- base ---------- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
@@ -141,6 +187,54 @@ svg { display: block; }
   transition: transform 0.12s, background 0.12s;
 }
 .round-btn:active { transform: scale(0.92); }
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* cigarettes / spliffs toggle (top right) */
+.mode-toggle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: none;
+  width: 84px;
+  height: 44px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--btn);
+  color: var(--text-2);
+  transition: background 0.2s;
+}
+.mode-thumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--range-bg);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.mode-toggle[aria-checked="true"] .mode-thumb { transform: translateX(40px); }
+.mode-ico {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  padding: 12px 7px;
+  fill: currentColor;
+  flex: none;
+  transition: color 0.2s;
+}
+.mode-toggle[aria-checked="false"] .mode-ico-cig,
+.mode-toggle[aria-checked="true"] .mode-ico-spliff { color: var(--range-text); }
+.mode-toggle:active .mode-thumb { transform: scale(0.94); }
+.mode-toggle[aria-checked="true"]:active .mode-thumb { transform: translateX(40px) scale(0.94); }
 
 /* ---------- main ---------- */
 .main-body {
@@ -192,13 +286,20 @@ svg { display: block; }
   user-select: none;
 }
 .disk.is-pressed { transform: scale(0.96); }
-.cig { width: 260px; height: 260px; }
+.cig { width: 260px; height: 260px; grid-area: 1 / 1; }
 .cig-body { fill: var(--cig-body); stroke: var(--cig-outline); stroke-width: 4; }
 .cig-filter { fill: var(--tan); stroke: var(--cig-outline); stroke-width: 4; stroke-linejoin: round; }
 .cig-filter-lines { fill: none; stroke: #B8782E; stroke-width: 2.5; stroke-linecap: round; opacity: 0.55; }
 .cig-cap { fill: var(--orange); stroke: var(--cig-outline); stroke-width: 4; stroke-linejoin: round; }
 .cig-ash { fill: var(--ash); }
 .cig-smoke { fill: none; stroke: var(--smoke); stroke-width: 3.5; stroke-linecap: round; }
+/* the spliff: paper cone, cardboard roach, twisted end */
+.spliff-paper { fill: var(--paper, #F8F3E6); stroke: var(--cig-outline); stroke-width: 4; stroke-linejoin: round; }
+.spliff-seam { fill: none; stroke: var(--cig-outline); stroke-width: 1.5; stroke-linecap: round; opacity: 0.18; }
+.spliff-roach { fill: var(--roach, #D2B183); stroke: var(--cig-outline); stroke-width: 4; stroke-linejoin: round; }
+.spliff-roach-lines { fill: none; stroke: var(--roach-lines, #8F6B3A); stroke-width: 2; stroke-linecap: round; opacity: 0.6; }
+.spliff-twist { fill: var(--paper, #F8F3E6); stroke: var(--cig-outline); stroke-width: 4; stroke-linejoin: round; }
+.spliff-twist-lines { fill: none; stroke: var(--cig-outline); stroke-width: 1.5; stroke-linecap: round; opacity: 0.3; }
 
 .today-row { text-align: center; min-height: 48px; }
 .glyphs {
@@ -214,6 +315,8 @@ svg { display: block; }
 .glyph-filter { fill: var(--tan); }
 .glyph-body { fill: var(--bar); }
 .glyph-tip { fill: var(--orange); }
+.glyph-roach { fill: var(--roach, #D2B183); }
+.glyph-cone { fill: var(--bar); }
 .last-one { font-size: 13px; color: var(--text-2); }
 
 @media (max-height: 700px) {

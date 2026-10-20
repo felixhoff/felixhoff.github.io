@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <title>Cigs</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<meta name="description" content="A tiny cigarette counter that lives on your phone.">
-<meta name="theme-color" content="#CFE3F5" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#13202E" media="(prefers-color-scheme: dark)">
+<meta name="description" content="A tiny cigarette and spliff counter that lives on your phone.">
+<meta name="theme-color" id="theme-light" content="#CFE3F5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" id="theme-dark" content="#13202E" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -16,6 +16,7 @@
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
 <link rel="stylesheet" href="./app.css">
+<script>try{if(localStorage.getItem('cigs.mode')==='spliff')document.documentElement.setAttribute('data-mode','spliff');}catch(e){}</script>
 </head>
 <body>
 <div id="app">
@@ -31,8 +32,20 @@
           <rect x="16" y="13" width="3" height="5" rx="1" fill="currentColor"/>
         </svg>
       </button>
-      <h1 class="topbar-title topbar-date" id="main-date">Today</h1>
-      <span class="round-spacer" aria-hidden="true"></span>
+      <h1 class="topbar-title visually-hidden" id="main-title">Cigs</h1>
+      <button class="mode-toggle" type="button" role="switch" aria-checked="false" aria-label="Spliff mode" data-mode-toggle>
+        <span class="mode-thumb" aria-hidden="true"></span>
+        <svg class="mode-ico mode-ico-cig" viewBox="0 0 22 10" width="22" height="10" aria-hidden="true">
+          <rect x="0" y="1.5" width="6" height="7" rx="1.5" opacity="0.55"/>
+          <rect x="6" y="1.5" width="12" height="7"/>
+          <rect x="18" y="1.5" width="4" height="7" rx="1.5"/>
+        </svg>
+        <svg class="mode-ico mode-ico-spliff" viewBox="0 0 22 12" width="22" height="12" aria-hidden="true">
+          <rect x="0" y="3.5" width="5" height="5" rx="1" opacity="0.55"/>
+          <path d="M5 3.5 L17 0.5 L17 11.5 L5 8.5 Z"/>
+          <path d="M17 1.5 L22 4.5 L22 7.5 L17 10.5 Z" opacity="0.8"/>
+        </svg>
+      </button>
     </header>
 
     <div class="main-body">
@@ -43,7 +56,7 @@
       </section>
 
       <button class="disk" id="btn-log" type="button" aria-label="Log a cigarette">
-        <svg class="cig" viewBox="0 0 260 260" aria-hidden="true">
+        <svg class="cig" id="art-cig" viewBox="0 0 260 260" aria-hidden="true">
           <defs>
             <clipPath id="cig-clip"><rect id="cig-clip-rect" x="0" y="0" width="190" height="260"/></clipPath>
             <radialGradient id="cig-glow-grad">
@@ -75,6 +88,43 @@
             </g>
           </g>
         </svg>
+        <svg class="cig spliff" id="art-spliff" viewBox="0 0 260 260" aria-hidden="true" hidden>
+          <defs>
+            <clipPath id="spliff-clip"><rect id="spliff-clip-rect" x="0" y="0" width="190" height="260"/></clipPath>
+            <radialGradient id="spliff-glow-grad">
+              <stop offset="0" stop-color="#FFC26B" stop-opacity="0.95"/>
+              <stop offset="0.45" stop-color="#FF7A59" stop-opacity="0.55"/>
+              <stop offset="1" stop-color="#FF7A59" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <g id="spliff-smoke" class="cig-smoke">
+            <path d="M191.3 54.6 A6.5 6.5 0 1 1 191.3 43.4"/>
+            <path d="M206.8 51.8 A5.5 5.5 0 1 1 206.8 42.2"/>
+          </g>
+          <g transform="rotate(-24 130 130)">
+            <!-- the paper cone, clipped on the right as it burns -->
+            <g clip-path="url(#spliff-clip)">
+              <path class="spliff-paper" d="M96 121 Q140 112 188 110 L188 150 Q140 148 96 139 Z"/>
+              <path class="spliff-seam" d="M100 128 Q144 121 186 118"/>
+              <path class="spliff-seam" d="M100 133 Q144 136 186 142"/>
+            </g>
+            <!-- rolled cardboard roach -->
+            <path class="spliff-roach" d="M70 121 H96 V139 H70 A9 9 0 0 1 70 121 Z"/>
+            <path class="spliff-roach-lines" d="M74 124 Q70 130 74 136 M80 123 Q76 130 80 137 M86 123 Q82 130 86 137"/>
+            <g id="spliff-tip">
+              <g id="spliff-ash" class="cig-ash" opacity="0">
+                <ellipse cx="184" cy="130" rx="6" ry="14"/>
+                <circle class="spliff-ashbit" cx="186" cy="142" r="2"/>
+                <circle class="spliff-ashbit" cx="191" cy="137" r="1.5"/>
+              </g>
+              <!-- twisted paper end, charred where it burns -->
+              <path id="spliff-cap" class="spliff-twist" d="M188 110 Q196 117 198 124 L206 121 Q211 130 206 139 L198 136 Q196 143 188 150 Z"/>
+              <path class="spliff-twist-lines" d="M199 127 L205 125 M199 133 L205 135 M192 118 L194 122 M192 142 L194 138"/>
+              <circle id="spliff-ember" cx="209" cy="130" r="5.5" fill="#FFD36B"/>
+              <circle id="spliff-glow" cx="210" cy="130" r="30" fill="url(#spliff-glow-grad)" opacity="0"/>
+            </g>
+          </g>
+        </svg>
       </button>
 
       <section class="today-row">
@@ -93,7 +143,19 @@
         </svg>
       </button>
       <h1 class="topbar-title">Statistics</h1>
-      <span class="round-spacer" aria-hidden="true"></span>
+      <button class="mode-toggle" type="button" role="switch" aria-checked="false" aria-label="Spliff mode" data-mode-toggle>
+        <span class="mode-thumb" aria-hidden="true"></span>
+        <svg class="mode-ico mode-ico-cig" viewBox="0 0 22 10" width="22" height="10" aria-hidden="true">
+          <rect x="0" y="1.5" width="6" height="7" rx="1.5" opacity="0.55"/>
+          <rect x="6" y="1.5" width="12" height="7"/>
+          <rect x="18" y="1.5" width="4" height="7" rx="1.5"/>
+        </svg>
+        <svg class="mode-ico mode-ico-spliff" viewBox="0 0 22 12" width="22" height="12" aria-hidden="true">
+          <rect x="0" y="3.5" width="5" height="5" rx="1" opacity="0.55"/>
+          <path d="M5 3.5 L17 0.5 L17 11.5 L5 8.5 Z"/>
+          <path d="M17 1.5 L22 4.5 L22 7.5 L17 10.5 Z" opacity="0.8"/>
+        </svg>
+      </button>
     </header>
     <div class="segmented" role="tablist" aria-label="Statistics sections" id="segmented">
       <span class="segmented-thumb" aria-hidden="true"></span>
