@@ -74,11 +74,17 @@
   // =====================================================================
 
   const ui = {
-    view: 'main',
+    view: 'main',        // 'main' | 'stats'
+    segment: 'today',    // 'today' | 'stats' | 'timeline'  (remembered while open)
+    range: 'month',      // timeline range
+    day: null,           // day key shown in the Today segment; null = today
+    tooltip: null,       // selected timeline bar index
   };
 
   function render() {
     renderMain();
+    if (ui.view === 'stats') renderStatsView();
+    updateSettingsInfo();
   }
 
   // =====================================================================
@@ -270,6 +276,423 @@
   toastAction.addEventListener('click', () => { const fn = toastOnAction; hideToast(); if (fn) fn(); });
 
   // =====================================================================
+  // Statistics view
+  // =====================================================================
+
+  const viewMain = $('#view-main');
+  const viewStats = $('#view-stats');
+  const statsScroll = $('#stats-scroll');
+  const segmented = $('#segmented');
+  const segThumb = $('.segmented-thumb', segmented);
+  const segBtns = $$('.segment', segmented);
+  const panels = { today: $('#panel-today'), stats: $('#panel-stats'), timeline: $('#panel-timeline') };
+  const SEGMENTS = ['today', 'stats', 'timeline'];
+
+  function showView(name) {
+    if (ui.view === name) return;
+    ui.view = name;
+    hideUndo();
+    hideToast();
+    ui.tooltip = null;
+    const entering = name === 'stats' ? viewStats : viewMain;
+    const leaving = name === 'stats' ? viewMain : viewStats;
+    leaving.hidden = true;
+    entering.hidden = false;
+    if (!REDUCED_MOTION && entering.animate) {
+      entering.animate(
+        [{ transform: 'translateX(' + (name === 'stats' ? 32 : -32) + 'px)', opacity: 0 }, { transform: 'none', opacity: 1 }],
+        { duration: 220, easing: 'ease-out' }
+      );
+    }
+    if (name === 'stats') statsScroll.scrollTop = 0;
+    render();
+  }
+  $('#btn-stats').addEventListener('click', () => showView('stats'));
+  $('#btn-back').addEventListener('click', () => showView('main'));
+
+  segBtns.forEach((b) => b.addEventListener('click', () => setSegment(b.dataset.seg)));
+  function setSegment(seg) {
+    ui.segment = seg;
+    ui.tooltip = null;
+    statsScroll.scrollTop = 0;
+    renderStatsView();
+  }
+
+  function renderStatsView() {
+    const idx = SEGMENTS.indexOf(ui.segment);
+    segThumb.style.transform = 'translateX(' + idx * 100 + '%)';
+    segBtns.forEach((b) => b.setAttribute('aria-selected', String(b.dataset.seg === ui.segment)));
+    SEGMENTS.forEach((s) => { panels[s].hidden = s !== ui.segment; });
+    if (ui.segment === 'today') renderToday();
+    else if (ui.segment === 'stats') renderStats();
+    else renderTimeline();
+  }
+
+  const CHEVRON_L = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14.5 6 8.5 12l6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const CHEVRON_R = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M9.5 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  // ---- Today segment: one day, today by default ----
+
+  function renderToday() {
+    const now = new Date();
+    const today = S.startOfDay(now);
+    const day = ui.day ? S.parseDay(ui.day) : today;
+    const isToday = +day === +today;
+    const list = S.dayEntries(dates, day);
+    const sum = S.summary(dates, now);
+
+    let html =
+      '<div class="daynav">' +
+        '<button class="nav-btn" id="day-prev" type="button" aria-label="Previous day">' + CHEVRON_L + '</button>' +
+        '<button class="daynav-label" id="day-reset" type="button"' + (isToday ? ' disabled' : ' aria-label="Back to today"') + '>' +
+          (isToday ? 'Today' : S.fmtDayLong(day)) + '</button>' +
+        '<button class="nav-btn" id="day-next" type="button" aria-label="Next day"' + (isToday ? ' disabled' : '') + '>' + CHEVRON_R + '</button>' +
+      '</div>' +
+      '<div class="big-count">' + list.length + '</div>' +
+      '<div class="big-label">' + (isToday ? 'cigarettes today' : 'cigarettes on ' + S.fmtDayShort(day)) + '</div>';
+
+    if (sum.days >= 7 && sum.avgPerDay !== null) {
+      const diff = list.length - sum.avgPerDay;
+      const word = Math.abs(diff) < 0.5 ? 'right on average' : diff < 0 ? 'below average' : 'above average';
+      html += '<div class="pill-note">avg ' + S.fmt1(sum.avgPerDay) + ' · ' + (isToday ? "you're " : '') + word + '</div>';
+    }
+
+    if (list.length) {
+      html += '<div class="card list">';
+      for (let i = list.length - 1; i >= 0; i--) {
+        const e = list[i];
+        const time = S.fmtTime(e.date);
+        html +=
+          '<div class="row" data-iso="' + entries[e.index] + '">' +
+            '<div class="row-content">' +
+              '<span class="row-n">#' + (i + 1) + '</span>' +
+              '<span class="row-time">' + time + '</span>' +
+              '<span class="row-gap">' + (e.gapMin === null ? 'first' : S.fmtGap(e.gapMin)) + '</span>' +
+            '</div>' +
+            '<button class="row-delete" type="button" tabindex="-1" aria-label="Delete the ' + time + ' entry">Delete</button>' +
+          '</div>';
+      }
+      html += '</div><p class="footnote">swipe an entry left to delete</p>';
+    } else {
+      html += '<div class="card empty">' + (isToday ? 'Nothing logged yet today.' : 'Nothing logged that day.') + '</div>';
+    }
+
+    panels.today.innerHTML = html;
+    $('#day-prev', panels.today).addEventListener('click', () => { ui.day = S.dayKey(S.addDays(day, -1)); renderToday(); });
+    $('#day-next', panels.today).addEventListener('click', () => {
+      const next = S.addDays(day, 1);
+      ui.day = next >= today ? null : S.dayKey(next);
+      renderToday();
+    });
+    $('#day-reset', panels.today).addEventListener('click', () => { ui.day = null; renderToday(); });
+    $$('.row', panels.today).forEach(attachSwipe);
+  }
+
+  // Swipe a row left (or long-press it) to reveal Delete.
+  const SWIPE_W = 88;
+  let openRow = null;
+  function attachSwipe(row) {
+    const content = $('.row-content', row);
+    const del = $('.row-delete', row);
+    let startX = 0, startY = 0, base = 0, dx = 0, tracking = false, swiping = false, pressTimer = 0;
+
+    const setX = (x) => {
+      content.style.transform = x ? 'translateX(' + x + 'px)' : '';
+      del.style.width = Math.max(0, -x) + 'px';
+    };
+    const open = () => {
+      if (openRow && openRow !== row) openRow.closeSwipe();
+      row.classList.add('is-open');
+      openRow = row;
+      setX(-SWIPE_W);
+    };
+    const close = () => {
+      row.classList.remove('is-open');
+      if (openRow === row) openRow = null;
+      setX(0);
+    };
+    row.closeSwipe = close;
+
+    row.addEventListener('pointerdown', (e) => {
+      if (e.target === del || e.button) return;
+      startX = e.clientX;
+      startY = e.clientY;
+      base = row.classList.contains('is-open') ? -SWIPE_W : 0;
+      tracking = true;
+      swiping = false;
+      clearTimeout(pressTimer);
+      pressTimer = setTimeout(() => { if (tracking && !swiping) { tracking = false; open(); } }, 450);
+    });
+    row.addEventListener('pointermove', (e) => {
+      if (!tracking) return;
+      const mx = e.clientX - startX;
+      const my = e.clientY - startY;
+      if (!swiping) {
+        if (Math.abs(my) > 8) { tracking = false; clearTimeout(pressTimer); return; }
+        if (Math.abs(mx) < 8) return;
+        swiping = true;
+        clearTimeout(pressTimer);
+        try { row.setPointerCapture(e.pointerId); } catch (err) { /* not supported */ }
+        if (openRow && openRow !== row) openRow.closeSwipe();
+        content.style.transition = 'none';
+        del.style.transition = 'none';
+      }
+      dx = Math.min(0, Math.max(-SWIPE_W - 24, base + mx));
+      setX(dx);
+    });
+    const end = () => {
+      clearTimeout(pressTimer);
+      if (!tracking) return;
+      tracking = false;
+      if (!swiping) { if (row.classList.contains('is-open')) close(); return; }
+      swiping = false;
+      content.style.transition = '';
+      del.style.transition = '';
+      if (dx < -SWIPE_W / 2) open(); else close();
+    };
+    row.addEventListener('pointerup', end);
+    row.addEventListener('pointercancel', end);
+    del.addEventListener('click', () => deleteEntry(row.dataset.iso));
+  }
+
+  function deleteEntry(iso) {
+    if (!removeEntry(iso)) return;
+    openRow = null;
+    toast('Deleted ' + S.fmtTime(new Date(iso)), { action: 'Undo', onAction: () => mergeEntries([iso]) });
+  }
+
+  // ---- Stats segment ----
+
+  function renderStats() {
+    const sum = S.summary(dates, new Date());
+    const show = (x, fmt) => (x === null ? '–' : fmt(x));
+    const tiles = [
+      [show(sum.avgPerDay, S.fmt1), 'avg per day'],
+      [show(sum.avgFirst, S.fmtMinutes), 'avg first cigarette'],
+      [show(sum.weekdayAvg, S.fmt1), 'weekdays'],
+      [show(sum.weekendAvg, S.fmt1), 'weekends'],
+    ];
+    const max = Math.max.apply(null, sum.hourAvg);
+    let bars = '';
+    for (let h = 0; h < 24; h++) {
+      const v = sum.hourAvg[h];
+      const cls = 'hbar' + (v === 0 ? ' is-empty' : '') + (h === sum.peakHour ? ' is-peak' : '');
+      const height = v === 0 ? '2px' : Math.max(2, (v / max) * 100) + '%';
+      bars += '<div class="' + cls + '" style="height:' + height + '" title="' + h + 'h: ' + S.fmt1(v) + '"></div>';
+    }
+    let note;
+    if (sum.peakHour === null) {
+      note = 'Nothing logged yet.';
+    } else {
+      const q = sum.quietest;
+      const quiet = !q ? ''
+        : q.before !== undefined ? ' · quietest before ' + q.before + 'h'
+        : q.at !== undefined ? ' · quietest at ' + q.at + 'h–' + (q.at + 1) + 'h'
+        : ' · quietest ' + q.from + 'h–' + q.to + 'h';
+      note = 'Peak at <b class="accent">' + sum.peakHour + 'h–' + (sum.peakHour + 1) + 'h</b>' + quiet;
+    }
+    panels.stats.innerHTML =
+      '<div class="tiles">' +
+        tiles.map((t) => '<div class="tile"><div class="tile-value">' + t[0] + '</div><div class="tile-label">' + t[1] + '</div></div>').join('') +
+      '</div>' +
+      '<div class="card chart-card">' +
+        '<div class="card-head"><h2>By hour of day</h2><span class="card-sub">all time · avg per day</span></div>' +
+        '<div class="hchart">' + bars + '</div>' +
+        '<div class="haxis"><span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>24h</span></div>' +
+        '<p class="chart-note">' + note + '</p>' +
+      '</div>' +
+      (sum.days ? '<p class="footnote">over ' + sum.days + (sum.days === 1 ? ' day' : ' complete days') + '</p>' : '');
+  }
+
+  // ---- Timeline segment ----
+
+  const RANGES = [['week', 'Week'], ['month', 'Month'], ['year', 'Year'], ['all', 'All time']];
+
+  function renderTimeline() {
+    const T = S.timeline(dates, new Date(), ui.range);
+    const max = Math.max(1, T.avg || 0, Math.max.apply(null, T.buckets.map((b) => b.count)));
+    const dayUnit = T.unit === 'day';
+
+    let html = '<div class="ranges" role="radiogroup" aria-label="Range">' +
+      RANGES.map((r) => '<button class="range' + (r[0] === ui.range ? ' is-selected' : '') + '" type="button" role="radio" aria-checked="' +
+        (r[0] === ui.range) + '" data-range="' + r[0] + '">' + r[1] + '</button>').join('') +
+      '</div>';
+
+    html += '<div class="tl-head"><div><span class="tl-num">' + T.total + '</span><span class="tl-label">' + T.label + '</span></div>';
+    if (T.change) {
+      const c = T.change;
+      const cls = c.pct < 0 ? 'is-lower' : c.pct > 0 ? 'is-higher' : 'is-same';
+      const arrow = c.pct < 0 ? '↓ ' : c.pct > 0 ? '↑ ' : '';
+      html += '<div class="tl-change ' + cls + '" title="complete days only">' + arrow + Math.abs(c.pct) + '% vs ' + c.label + '</div>';
+    }
+    html += '</div>';
+
+    const gap = T.buckets.length > 31 ? 1 : T.buckets.length > 12 ? 2 : 6;
+    let bars = '';
+    T.buckets.forEach((b, i) => {
+      let cls = 'tbar';
+      if (b.isWeekend) cls += ' is-weekend';
+      if (b.isCurrent) cls += ' is-current';
+      if (b.isFuture) cls += ' is-future';
+      const h = b.count ? Math.max(2, (b.count / max) * 100) + '%' : '2px';
+      bars += '<button class="' + cls + '" type="button" style="height:' + h + '" data-i="' + i + '" aria-label="' +
+        b.title + ': ' + b.count + '"' + (b.isFuture ? ' disabled' : '') + '></button>';
+    });
+    const avgLine = T.avg === null ? '' :
+      '<div class="avg-line" style="bottom:' + (T.avg / max) * 100 + '%"><span>avg ' + S.fmt1(T.avg) +
+      (dayUnit ? '' : T.unit === 'week' ? ' / week' : ' / month') + '</span></div>';
+    const axis = T.axis.map((a) => '<span style="left:' + ((a.i + 0.5) / T.buckets.length) * 100 + '%">' + a.text + '</span>').join('');
+    html += '<div class="card chart-card">' +
+      '<div class="tchart" style="gap:' + gap + 'px">' + bars + avgLine + '<div class="tooltip" id="tl-tooltip" hidden></div></div>' +
+      '<div class="taxis">' + axis + '</div>' +
+      (dayUnit ? '<div class="legend"><span><i class="sw sw-weekday"></i>weekday</span><span><i class="sw sw-weekend"></i>weekend</span></div>' : '') +
+      '</div>';
+
+    const lh = (x) => (x ? x.count + ' · ' + S.fmtDayShort(x.day) : '–');
+    const lhBtn = (label, x, cls) => '<button type="button" class="lh ' + cls + '" data-day="' + (x ? S.dayKey(x.day) : '') + '"' +
+      (x ? ' aria-label="' + label + ', open ' + S.fmtDayLong(x.day) + '"' : ' disabled') +
+      '><span class="lh-label">' + label + '</span><span class="lh-value">' + lh(x) + '</span></button>';
+    html += '<div class="card lowhigh">' + lhBtn('Lowest day', T.lowest, '') + '<span class="lh-sep"></span>' + lhBtn('Highest day', T.highest, 'lh-right') + '</div>' +
+      '<p class="footnote">tap a bar to see that ' + (dayUnit ? 'day' : T.unit) + '</p>';
+
+    panels.timeline.innerHTML = html;
+    $$('.range', panels.timeline).forEach((b) => b.addEventListener('click', () => { ui.range = b.dataset.range; ui.tooltip = null; renderTimeline(); }));
+    $$('.tbar', panels.timeline).forEach((b) => b.addEventListener('click', () => showTooltip(T, +b.dataset.i)));
+    $$('.lh', panels.timeline).forEach((b) => b.addEventListener('click', () => openDay(b.dataset.day)));
+    if (ui.tooltip !== null) showTooltip(T, ui.tooltip);
+  }
+
+  function openDay(key) {
+    if (!key) return;
+    ui.day = key === S.dayKey(new Date()) ? null : key;
+    setSegment('today');
+  }
+
+  function showTooltip(T, i) {
+    const b = T.buckets[i];
+    const tip = $('#tl-tooltip');
+    if (!b || !tip) return;
+    ui.tooltip = i;
+    const chart = tip.parentNode;
+    $$('.tbar', chart).forEach((el) => el.classList.toggle('is-selected', +el.dataset.i === i));
+    tip.innerHTML = '<span>' + b.title + ' · <b>' + b.count + '</b></span>' +
+      (b.day ? '<button type="button" class="tooltip-open">Open</button>' : '');
+    tip.hidden = false;
+    const bar = $('.tbar[data-i="' + i + '"]', chart);
+    const x = bar.offsetLeft + bar.offsetWidth / 2;
+    tip.style.left = Math.max(0, Math.min(chart.clientWidth - tip.offsetWidth, x - tip.offsetWidth / 2)) + 'px';
+    const open = $('.tooltip-open', tip);
+    if (open) open.addEventListener('click', () => openDay(S.dayKey(b.day)));
+  }
+  function hideTooltip() {
+    ui.tooltip = null;
+    const tip = $('#tl-tooltip');
+    if (tip) tip.hidden = true;
+    $$('.tbar.is-selected').forEach((el) => el.classList.remove('is-selected'));
+  }
+  document.addEventListener('click', (e) => {
+    if (ui.tooltip === null) return;
+    if (e.target.closest('.tbar') || e.target.closest('.tooltip')) return;
+    hideTooltip();
+  });
+
+  // =====================================================================
+  // Settings: export, import, sound, delete all
+  // =====================================================================
+
+  const sheet = $('#sheet');
+  const backdrop = $('#sheet-backdrop');
+  const soundToggle = $('#toggle-sound');
+  const deleteConfirm = $('#delete-confirm');
+  const deleteInput = $('#delete-input');
+  const deleteBtn = $('#btn-delete-confirm');
+
+  function openSheet() {
+    updateSettingsInfo();
+    soundToggle.checked = soundEnabled();
+    hideDeleteConfirm();
+    sheet.classList.add('is-open');
+    backdrop.classList.add('is-open');
+    sheet.setAttribute('aria-hidden', 'false');
+  }
+  function closeSheet() {
+    sheet.classList.remove('is-open');
+    backdrop.classList.remove('is-open');
+    sheet.setAttribute('aria-hidden', 'true');
+  }
+  function updateSettingsInfo() {
+    const n = entries.length;
+    $('#export-sub').textContent = n ? n + (n === 1 ? ' entry' : ' entries') + ' since ' + S.fmtDayShort(dates[0]) : 'no entries yet';
+  }
+  $('#btn-settings').addEventListener('click', openSheet);
+  $('#btn-sheet-close').addEventListener('click', closeSheet);
+  backdrop.addEventListener('click', closeSheet);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
+
+  soundToggle.addEventListener('change', () => localStorage.setItem(SOUND_KEY, soundToggle.checked ? '1' : '0'));
+
+  $('#btn-export').addEventListener('click', exportBackup);
+  function exportBackup() {
+    const name = 'cigs-backup-' + S.dayKey(new Date()) + '.json';
+    const payload = { app: 'cigs', version: 1, exportedAt: S.toLocalISO(new Date()), entries: entries };
+    const blob = new Blob([JSON.stringify(payload, null, 1)], { type: 'application/json' });
+    const download = () => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+    };
+    // On iPhone the share sheet is the way to save a file (Files, AirDrop, Mail, ...).
+    let file = null;
+    try { file = new File([blob], name, { type: 'application/json' }); } catch (e) { /* no File constructor */ }
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file], title: name }).catch((err) => { if (err && err.name !== 'AbortError') download(); });
+    } else {
+      download();
+    }
+  }
+
+  const fileInput = $('#file-import');
+  $('#btn-import').addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files && fileInput.files[0];
+    fileInput.value = '';
+    if (!file) return;
+    file.text().then((text) => {
+      let data = null;
+      try { data = JSON.parse(text); } catch (e) { /* handled below */ }
+      const list = Array.isArray(data) ? data : data && Array.isArray(data.entries) ? data.entries : null;
+      if (!list) { toast('That file is not a Cigs backup'); return; }
+      const added = mergeEntries(list);
+      closeSheet();
+      toast(added ? 'Imported ' + added + (added === 1 ? ' new entry' : ' new entries') : 'Nothing new in that backup');
+    }).catch(() => toast('Could not read that file'));
+  });
+
+  $('#btn-delete-all').addEventListener('click', () => {
+    const show = deleteConfirm.hidden;
+    deleteConfirm.hidden = !show;
+    $('#btn-delete-all').setAttribute('aria-expanded', String(show));
+    if (show) deleteInput.focus();
+  });
+  deleteInput.addEventListener('input', () => { deleteBtn.disabled = deleteInput.value.trim() !== 'DELETE'; });
+  deleteBtn.addEventListener('click', () => {
+    if (deleteInput.value.trim() !== 'DELETE') return;
+    replaceEntries([]);
+    ui.day = null;
+    closeSheet();
+    toast('All data deleted');
+  });
+  function hideDeleteConfirm() {
+    deleteConfirm.hidden = true;
+    deleteInput.value = '';
+    deleteBtn.disabled = true;
+    $('#btn-delete-all').setAttribute('aria-expanded', 'false');
+  }
+
+  // =====================================================================
   // Keep the screen fresh across midnight and when the app resumes
   // =====================================================================
 
@@ -296,8 +719,10 @@
   }
 
   // Console helpers for development (never run automatically).
+  //   cigs.seedDemoData(60)  replaces all data with 60 days of generated history
   window.cigs = {
     entries: () => entries.slice(),
     add: addEntry, remove: removeEntry, merge: mergeEntries, replace: replaceEntries,
+    seedDemoData: (days, seed) => { replaceEntries(S.generateDemoEntries(new Date(), days, seed)); return entries.length; },
   };
 })();

@@ -95,10 +95,58 @@
       <h1 class="topbar-title">Statistics</h1>
       <span class="round-spacer" aria-hidden="true"></span>
     </header>
+    <div class="segmented" role="tablist" aria-label="Statistics sections" id="segmented">
+      <span class="segmented-thumb" aria-hidden="true"></span>
+      <button class="segment" role="tab" type="button" data-seg="today" aria-selected="true" aria-controls="panel-today">Today</button>
+      <button class="segment" role="tab" type="button" data-seg="stats" aria-selected="false" aria-controls="panel-stats">Stats</button>
+      <button class="segment" role="tab" type="button" data-seg="timeline" aria-selected="false" aria-controls="panel-timeline">Timeline</button>
+    </div>
     <div class="scroll" id="stats-scroll">
-      <p class="footnote">Statistics coming next.</p>
+      <section class="panel" id="panel-today" role="tabpanel"></section>
+      <section class="panel" id="panel-stats" role="tabpanel" hidden></section>
+      <section class="panel" id="panel-timeline" role="tabpanel" hidden></section>
+      <button class="settings-btn" id="btn-settings" type="button">
+        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="3.2"/>
+          <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>
+        </svg>
+        Settings
+      </button>
     </div>
   </section>
+
+  <!-- ============ Settings sheet ============ -->
+  <div class="sheet-backdrop" id="sheet-backdrop"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" aria-hidden="true">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <h2 class="sheet-title" id="sheet-title">Settings</h2>
+    <div class="sheet-list">
+      <button class="sheet-row" id="btn-export" type="button">
+        <span class="sheet-row-main">Export backup</span>
+        <span class="sheet-row-sub" id="export-sub"></span>
+      </button>
+      <button class="sheet-row" id="btn-import" type="button">
+        <span class="sheet-row-main">Import backup</span>
+        <span class="sheet-row-sub">merges a cigs-backup file</span>
+      </button>
+      <input type="file" id="file-import" accept="application/json,.json" hidden>
+      <label class="sheet-row" for="toggle-sound">
+        <span class="sheet-row-main">Sound</span>
+        <input type="checkbox" class="switch" id="toggle-sound" role="switch">
+      </label>
+      <button class="sheet-row danger" id="btn-delete-all" type="button" aria-expanded="false" aria-controls="delete-confirm">
+        <span class="sheet-row-main">Delete all data</span>
+      </button>
+      <div class="delete-confirm" id="delete-confirm" hidden>
+        <label for="delete-input">Type DELETE to confirm. This cannot be undone.</label>
+        <div class="delete-confirm-row">
+          <input id="delete-input" type="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="DELETE">
+          <button class="btn-danger" id="btn-delete-confirm" type="button" disabled>Delete</button>
+        </div>
+      </div>
+    </div>
+    <button class="sheet-close" id="btn-sheet-close" type="button">Close</button>
+  </div>
 
   <!-- ============ Toast ============ -->
   <div class="toast" id="toast" role="status" hidden>
