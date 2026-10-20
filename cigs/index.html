@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Cigs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="description" content="A tiny cigarette counter that lives on your phone.">
+<meta name="theme-color" content="#CFE3F5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#13202E" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Cigs">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icons/icon-180.png">
+<link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ Main ============ -->
+  <main class="view view-main" id="view-main">
+    <header class="topbar">
+      <button class="round-btn" id="btn-stats" type="button" aria-label="Statistics">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+          <path d="M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <rect x="6" y="11" width="3" height="7" rx="1" fill="currentColor"/>
+          <rect x="11" y="5" width="3" height="13" rx="1" fill="currentColor"/>
+          <rect x="16" y="13" width="3" height="5" rx="1" fill="currentColor"/>
+        </svg>
+      </button>
+      <h1 class="topbar-title topbar-date" id="main-date">Today</h1>
+      <span class="round-spacer" aria-hidden="true"></span>
+    </header>
+
+    <div class="main-body">
+      <section class="counter">
+        <div class="counter-num" id="main-count" aria-live="polite">0</div>
+        <div class="counter-label">today</div>
+        <button class="undo-btn" id="btn-undo" type="button" hidden>Undo</button>
+      </section>
+
+      <button class="disk" id="btn-log" type="button" aria-label="Log a cigarette">
+        <svg class="cig" viewBox="0 0 260 260" aria-hidden="true">
+          <defs>
+            <clipPath id="cig-clip"><rect id="cig-clip-rect" x="0" y="0" width="190" height="260"/></clipPath>
+            <radialGradient id="cig-glow-grad">
+              <stop offset="0" stop-color="#FFC26B" stop-opacity="0.95"/>
+              <stop offset="0.45" stop-color="#FF7A59" stop-opacity="0.55"/>
+              <stop offset="1" stop-color="#FF7A59" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <!-- smoke stays upright, outside the rotated group -->
+          <g id="cig-smoke" class="cig-smoke">
+            <path d="M187.3 59.6 A6.5 6.5 0 1 1 187.3 48.4"/>
+            <path d="M202.8 56.8 A5.5 5.5 0 1 1 202.8 47.2"/>
+          </g>
+          <g transform="rotate(-24 130 130)">
+            <g clip-path="url(#cig-clip)">
+              <rect class="cig-body" x="96" y="114" width="92" height="32"/>
+            </g>
+            <path class="cig-filter" d="M68 114 H96 V146 H68 A16 16 0 0 1 68 114 Z"/>
+            <path class="cig-filter-lines" d="M66 121 V139 M74 121 V139 M82 121 V139"/>
+            <g id="cig-tip">
+              <g id="cig-ash" class="cig-ash" opacity="0">
+                <ellipse cx="182" cy="130" rx="6" ry="11"/>
+                <circle class="cig-ashbit" cx="184" cy="140" r="2"/>
+                <circle class="cig-ashbit" cx="189" cy="136" r="1.5"/>
+              </g>
+              <path id="cig-cap" class="cig-cap" d="M180 114 H192 A16 16 0 0 1 192 146 H180 Z"/>
+              <circle id="cig-ember" cx="196" cy="130" r="5.5" fill="#FFD36B"/>
+              <circle id="cig-glow" cx="197" cy="130" r="28" fill="url(#cig-glow-grad)" opacity="0"/>
+            </g>
+          </g>
+        </svg>
+      </button>
+
+      <section class="today-row">
+        <div class="glyphs" id="glyphs" aria-hidden="true"></div>
+        <div class="last-one" id="main-last">no cigarette yet</div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ============ Statistics ============ -->
+  <section class="view view-stats" id="view-stats" hidden>
+    <header class="topbar">
+      <button class="round-btn" id="btn-back" type="button" aria-label="Back">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+          <path d="M14.5 5.5 8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <h1 class="topbar-title">Statistics</h1>
+      <span class="round-spacer" aria-hidden="true"></span>
+    </header>
+    <div class="scroll" id="stats-scroll">
+      <p class="footnote">Statistics coming next.</p>
+    </div>
+  </section>
+
+  <!-- ============ Toast ============ -->
+  <div class="toast" id="toast" role="status" hidden>
+    <span id="toast-text"></span>
+    <button type="button" id="toast-action" hidden>Undo</button>
+  </div>
+</div>
+
+<script src="./stats.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
