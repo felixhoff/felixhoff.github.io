@@ -43,12 +43,17 @@ each have their own storage.
     the previous period, and the lowest and highest day in the range. Tap a
     bar for its count; **Open** jumps to that day.
 - **Settings** (bottom of the Statistics screen): export and import a
-  backup (both lists), turn the click sound off, delete all data (both
-  lists).
+  backup (both lists), choose the hour at which a day starts, turn the click
+  sound off, delete all data (both lists).
 
 ### How the numbers are computed
 
-- A day runs from local midnight to local midnight.
+- A day runs from **06:00 to 06:00** local time, not midnight to midnight:
+  a cigarette at 01:30 on the 21st counts for the 20th, as the last one of
+  that evening. The hour is changeable in **Settings → Day starts at** (00:00
+  gives plain calendar days). Only the grouping changes, never the stored
+  timestamps, so the whole history is regrouped instantly when the setting
+  changes.
 - Averages cover every day from the first logged day up to **yesterday**;
   days without a cigarette count as 0. Today is left out until it is over,
   so a quiet morning does not drag the average down. (If today is the only
@@ -100,7 +105,8 @@ cigs/
 
 Data is stored under the localStorage keys `cigs.entries` (cigarettes) and
 `cigs.spliffs` (spliffs) as sorted JSON arrays of timestamps; `cigs.mode`
-remembers the toggle (`cig` or `spliff`) and `cigs.sound` the sound setting.
+remembers the toggle (`cig` or `spliff`), `cigs.dayStart` the hour a day
+starts at (default 6) and `cigs.sound` the sound setting.
 
 ## Development
 

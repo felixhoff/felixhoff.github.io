@@ -1,7 +1,7 @@
 /* sw.js — offline support for Cigs.
    Bump CACHE_VERSION on every release: the new worker precaches the new
    files and deletes the old cache when it activates. */
-const CACHE_VERSION = 'cigs-v2';
+const CACHE_VERSION = 'cigs-v3';
 const SHELL = [
   './',
   './index.html',

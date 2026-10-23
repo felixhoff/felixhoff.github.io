@@ -603,6 +603,25 @@ svg { display: block; }
 .sheet-row:first-child { border-top: 0; }
 .sheet-row-sub { font-size: 12px; color: var(--text-2); text-align: right; }
 .sheet-row.danger { color: var(--danger); }
+.sheet-row-hint { display: block; font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  background: var(--btn);
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 30px 7px 14px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23888' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 11px;
+}
 .switch {
   appearance: none;
   -webkit-appearance: none;

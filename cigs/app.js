@@ -6,6 +6,7 @@
   const STORAGE_KEYS = { cig: 'cigs.entries', spliff: 'cigs.spliffs' };
   const MODE_KEY = 'cigs.mode';
   const SOUND_KEY = 'cigs.sound';
+  const DAY_START_KEY = 'cigs.dayStart';   // hour (0-23) at which a day begins, default 6
   const MODES = ['cig', 'spliff'];
   const NOUN = { cig: 'cigarette', spliff: 'spliff' };
   const NOUNS = { cig: 'cigarettes', spliff: 'spliffs' };
@@ -169,7 +170,7 @@
 
   function renderMain() {
     const now = new Date();
-    const todays = S.dayEntries(dates, now);
+    const todays = S.dayEntries(dates, S.dayOf(now));
     setCount(mainCount, todays.length);
     glyphs.innerHTML = GLYPH[mode].repeat(todays.length);
     mainLast.textContent = todays.length
@@ -417,7 +418,7 @@
 
   function renderToday() {
     const now = new Date();
-    const today = S.startOfDay(now);
+    const today = S.dayOf(now);
     const day = ui.day ? S.parseDay(ui.day) : today;
     const isToday = +day === +today;
     const list = S.dayEntries(dates, day);
@@ -646,7 +647,7 @@
 
   function openDay(key) {
     if (!key) return;
-    ui.day = key === S.dayKey(new Date()) ? null : key;
+    ui.day = key === S.dayKeyOf(new Date()) ? null : key;
     setSegment('today');
   }
 
@@ -689,6 +690,31 @@
   const deleteInput = $('#delete-input');
   const deleteBtn = $('#btn-delete-confirm');
 
+  // --- when a day starts (default 06:00) ---
+  const dayStartSelect = $('#select-day-start');
+  for (let h = 0; h < 24; h++) {
+    const o = document.createElement('option');
+    o.value = String(h);
+    o.textContent = (h < 10 ? '0' : '') + h + ':00';
+    dayStartSelect.appendChild(o);
+  }
+  function loadDayStart() {
+    let h = 6;
+    try { const v = localStorage.getItem(DAY_START_KEY); if (v !== null && v !== '') h = Number(v); } catch (e) { /* default */ }
+    S.setDayStart(h);
+    dayStartSelect.value = String(S.dayStart());
+  }
+  dayStartSelect.addEventListener('change', () => {
+    const h = S.setDayStart(dayStartSelect.value);
+    dayStartSelect.value = String(h);
+    try { localStorage.setItem(DAY_START_KEY, String(h)); } catch (e) { /* remembered only for this visit */ }
+    ui.day = null;
+    ui.tooltip = null;
+    lastDayKey = S.dayKeyOf(new Date());
+    render();
+    toast(h === 0 ? 'Days now start at midnight' : 'Days now start at ' + dayStartSelect.options[h].textContent);
+  });
+
   function openSheet() {
     updateSettingsInfo();
     soundToggle.checked = soundEnabled();
@@ -707,7 +733,7 @@
     const ns = lists.spliff.length;
     const first = [lists.cig[0], lists.spliff[0]].filter(Boolean).sort((a, b) => Date.parse(a) - Date.parse(b))[0];
     $('#export-sub').textContent = nc + ns
-      ? nc + (nc === 1 ? ' cigarette' : ' cigarettes') + ' · ' + ns + (ns === 1 ? ' spliff' : ' spliffs') + ' since ' + S.fmtDayShort(new Date(first))
+      ? nc + (nc === 1 ? ' cigarette' : ' cigarettes') + ' · ' + ns + (ns === 1 ? ' spliff' : ' spliffs') + ' since ' + S.fmtDayShort(S.dayOf(new Date(first)))
       : 'no entries yet';
   }
   $('#btn-settings').addEventListener('click', openSheet);
@@ -784,9 +810,9 @@
   // Keep the screen fresh across midnight and when the app resumes
   // =====================================================================
 
-  let lastDayKey = S.dayKey(new Date());
+  let lastDayKey = S.dayKeyOf(new Date());
   function refreshIfDayChanged() {
-    const k = S.dayKey(new Date());
+    const k = S.dayKeyOf(new Date());
     if (k !== lastDayKey) { lastDayKey = k; render(); }
   }
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { refreshIfDayChanged(); renderMain(); } });
@@ -797,6 +823,7 @@
   // Boot
   // =====================================================================
 
+  loadDayStart();
   loadEntries();
   setMode(mode, { silent: true });
 
@@ -811,6 +838,7 @@
   window.cigs = {
     entries: () => entries.slice(),
     mode: () => mode, setMode: setMode,
+    dayStart: () => S.dayStart(),
     add: addEntry, remove: removeEntry, merge: mergeEntries, replace: replaceEntries,
     seedDemoData: (days, seed) => { replaceEntries(S.generateDemoEntries(new Date(), days, seed)); return entries.length; },
   };

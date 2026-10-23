@@ -8,6 +8,18 @@
   'use strict';
 
   const DAY_MS = 86400000;
+
+  // The hour at which a day starts (default 06:00): a cigarette at 02:00 on
+  // the 21st counts for the 20th. Timestamps are never changed, only grouped,
+  // so changing this re-sorts all existing data into the new days.
+  let DAY_START = 6;
+  function setDayStart(h) {
+    h = Number(h);
+    if (!Number.isInteger(h) || h < 0 || h > 23) return DAY_START;
+    DAY_START = h;
+    return DAY_START;
+  }
+  function dayStart() { return DAY_START; }
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
   const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const WEEKDAYS_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -40,7 +52,17 @@
     return new Date(p[0], p[1] - 1, p[2]);
   }
 
+  // Day objects are local midnights of a calendar day; these helpers take those.
   function startOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+
+  // Timestamps go through these: the same instant moved back by DAY_START
+  // hours (wall clock, so DST changes do not shift it), the midnight of the
+  // day it belongs to, and that day's key.
+  function logicalTime(d) {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours() - DAY_START, d.getMinutes(), d.getSeconds(), d.getMilliseconds());
+  }
+  function dayOf(d) { return startOfDay(logicalTime(d)); }
+  function dayKeyOf(d) { return dayKey(dayOf(d)); }
   function addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
   function daysBetween(a, b) { return Math.round((startOfDay(b) - startOfDay(a)) / DAY_MS); }
   function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
@@ -52,6 +74,8 @@
   }
   function isWeekend(d) { const w = d.getDay(); return w === 0 || w === 6; }
   function minutesOfDay(d) { return d.getHours() * 60 + d.getMinutes(); }
+  // minutes since the start of the (logical) day, 0..1439
+  function minutesSinceDayStart(d) { return (minutesOfDay(d) - DAY_START * 60 + 1440) % 1440; }
 
   // ---------- formatting ----------
 
@@ -67,28 +91,28 @@
   // dates: ascending array of Date objects.
   function countsByDay(dates) {
     const m = new Map();
-    for (const d of dates) { const k = dayKey(d); m.set(k, (m.get(k) || 0) + 1); }
+    for (const d of dates) { const k = dayKeyOf(d); m.set(k, (m.get(k) || 0) + 1); }
     return m;
   }
 
-  // Entries of one local day, ascending, each with the gap (minutes) since the
-  // previous one that day and its index in the full list.
+  // Entries of one day (a day object), ascending, each with the gap (minutes)
+  // since the previous one that day and its index in the full list.
   function dayEntries(dates, day) {
     const k = dayKey(day);
     const out = [];
     let prev = null;
     for (let i = 0; i < dates.length; i++) {
       const d = dates[i];
-      if (dayKey(d) !== k) continue;
+      if (dayKeyOf(d) !== k) continue;
       out.push({ date: d, index: i, gapMin: prev ? Math.round((d - prev) / 60000) : null });
       prev = d;
     }
     return out;
   }
 
-  function countBetween(dates, from, to) { // from <= d < to
+  function countBetween(dates, from, to) { // from <= d < to, in day boundaries
     let n = 0;
-    for (const d of dates) if (d >= from && d < to) n++;
+    for (const d of dates) { const t = logicalTime(d); if (t >= from && t < to) n++; }
     return n;
   }
 
@@ -98,8 +122,8 @@
   // (today is still in progress). If today is the only day with data, it counts.
   function countedDays(dates, now) {
     if (!dates.length) return [];
-    const today = startOfDay(now);
-    const first = startOfDay(dates[0]);
+    const today = dayOf(now);
+    const first = dayOf(dates[0]);
     if (first > today) return [];
     let last = addDays(today, -1);
     if (first > last) last = today;
@@ -133,16 +157,16 @@
     const firstOfDay = new Map();
     const hours = new Array(24).fill(0);
     for (const d of dates) {
-      const k = dayKey(d);
+      const k = dayKeyOf(d);
       if (!keys.has(k)) continue;
       hours[d.getHours()]++;
-      const m = minutesOfDay(d);
+      const m = minutesSinceDayStart(d);
       if (!firstOfDay.has(k) || m < firstOfDay.get(k)) firstOfDay.set(k, m);
     }
     if (firstOfDay.size) {
       let s = 0;
       firstOfDay.forEach((m) => { s += m; });
-      res.avgFirst = s / firstOfDay.size;
+      res.avgFirst = (s / firstOfDay.size + DAY_START * 60) % 1440;   // back to clock time
     }
     res.hourAvg = hours.map((h) => h / days.length);
     let peak = 0;
@@ -181,8 +205,8 @@
 
   // range: 'week' | 'month' | 'year' | 'all'
   function timeline(dates, now, range) {
-    const today = startOfDay(now);
-    const firstDay = dates.length ? startOfDay(dates[0]) : null;
+    const today = dayOf(now);
+    const firstDay = dates.length ? dayOf(dates[0]) : null;
     const counts = countsByDay(dates);
     let unit, start, end, label;
     if (range === 'week') { unit = 'day'; start = startOfWeek(today); end = addDays(start, 7); label = 'this week'; }
@@ -212,7 +236,8 @@
 
     const b0 = buckets[0].start;
     let total = 0;
-    for (const d of dates) {
+    for (const raw of dates) {
+      const d = logicalTime(raw);
       if (d < start || d >= end) continue;
       let i;
       if (unit === 'day') i = daysBetween(b0, d);
@@ -334,8 +359,9 @@
 
   return {
     MONTHS, WEEKDAYS, WEEKDAYS_SHORT,
+    setDayStart, dayStart, logicalTime, dayOf, dayKeyOf,
     toLocalISO, isValidISO, dayKey, parseDay, startOfDay, addDays, daysBetween,
-    startOfMonth, addMonths, daysInMonth, startOfWeek, isWeekend, minutesOfDay,
+    startOfMonth, addMonths, daysInMonth, startOfWeek, isWeekend, minutesOfDay, minutesSinceDayStart,
     fmtTime, fmtMinutes, fmtGap, fmtDayLong, fmtDayShort, fmt1,
     countsByDay, dayEntries, countBetween, countedDays, summary, quietestHours, timeline,
     generateDemoEntries,

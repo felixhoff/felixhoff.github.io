@@ -192,6 +192,10 @@
         <span class="sheet-row-sub">merges a cigs-backup file</span>
       </button>
       <input type="file" id="file-import" accept="application/json,.json" hidden>
+      <label class="sheet-row" for="select-day-start">
+        <span class="sheet-row-main">Day starts at<span class="sheet-row-hint">late nights count for the day before</span></span>
+        <select class="select" id="select-day-start" aria-label="Hour at which a day starts"></select>
+      </label>
       <label class="sheet-row" for="toggle-sound">
         <span class="sheet-row-main">Sound</span>
         <input type="checkbox" class="switch" id="toggle-sound" role="switch">

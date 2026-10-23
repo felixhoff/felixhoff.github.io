@@ -137,4 +137,61 @@ check('demo data and period comparison', () => {
   assert.equal(S.generateDemoEntries(now, 30, 1).join(), S.generateDemoEntries(now, 30, 1).join(), 'deterministic');
 });
 
+// ---- the day starts at 06:00 by default: late nights count for the day before ----
+check('day start: grouping, keys and times', () => {
+  assert.equal(S.dayStart(), 6);
+  assert.equal(S.dayKeyOf(mk(2026, 10, 18, 1, 30)), '2026-10-17');      // 01:30 on the 18th -> the 17th
+  assert.equal(S.dayKeyOf(mk(2026, 10, 18, 5, 59)), '2026-10-17');
+  assert.equal(S.dayKeyOf(mk(2026, 10, 18, 6, 0)), '2026-10-18');
+  assert.equal(S.dayKeyOf(mk(2026, 10, 18, 23, 59)), '2026-10-18');
+  assert.equal(+S.dayOf(mk(2026, 10, 18, 1, 30)), +mk(2026, 10, 17, 0, 0));
+  assert.equal(+S.logicalTime(mk(2026, 10, 18, 1, 30)), +mk(2026, 10, 17, 19, 30));
+  assert.equal(S.minutesSinceDayStart(mk(2026, 10, 18, 6, 0)), 0);
+  assert.equal(S.minutesSinceDayStart(mk(2026, 10, 18, 1, 30)), 19 * 60 + 30);
+  // the first of the month: 1 March 02:00 belongs to 28 February
+  assert.equal(S.dayKeyOf(mk(2026, 3, 1, 2, 0)), '2026-02-28');
+  // across the autumn DST change (Oct 25 2026 in Europe) the boundary stays at 06:00 wall clock
+  assert.equal(S.dayKeyOf(mk(2026, 10, 25, 5, 30)), '2026-10-24');
+  assert.equal(S.dayKeyOf(mk(2026, 10, 25, 6, 30)), '2026-10-25');
+  // setDayStart validates and reports the value in force
+  assert.equal(S.setDayStart('4'), 4);
+  assert.equal(S.dayKeyOf(mk(2026, 10, 18, 3, 59)), '2026-10-17');
+  assert.equal(S.dayKeyOf(mk(2026, 10, 18, 4, 0)), '2026-10-18');
+  assert.equal(S.setDayStart(25), 4);
+  assert.equal(S.setDayStart('x'), 4);
+  assert.equal(S.setDayStart(0), 0);
+  assert.equal(S.dayKeyOf(mk(2026, 10, 18, 0, 0)), '2026-10-18');      // midnight: the classic calendar day
+  assert.equal(S.setDayStart(6), 6);
+});
+check('day start: statistics regroup existing data', () => {
+  // the Oct 17 evening runs late: 00:40 and 01:30 on the 18th belong to the 17th
+  const late = dates.concat([mk(2026, 10, 18, 0, 40), mk(2026, 10, 18, 1, 30)]).sort((a, b) => a - b);
+  const l17 = S.dayEntries(late, mk(2026, 10, 17, 0, 0));
+  assert.equal(l17.length, 6);
+  assert.equal(S.fmtTime(l17[5].date), '01:30');
+  assert.equal(l17[4].gapMin, 190);                                      // 21:30 -> 00:40
+  assert.equal(S.dayEntries(late, mk(2026, 10, 18, 0, 0)).length, 1);   // only the 10:00
+  assert.equal(S.countsByDay(late).get('2026-10-17'), 6);
+  const s = S.summary(late, now);
+  assert.equal(s.days, 3);
+  assert.equal(s.avgPerDay.toFixed(2), '2.33');                        // 6 + 1 + 0 over three days
+  assert.equal(S.fmtMinutes(s.avgFirst), '09:30');                       // 01:30 is not a "first cigarette"
+  const T = S.timeline(late, now, 'month');
+  assert.equal(T.buckets[16].count, 6);
+  assert.equal(T.buckets[17].count, 1);
+  assert.equal(T.highest.count, 6);
+  assert.equal(S.countBetween(late, mk(2026, 10, 17, 0, 0), mk(2026, 10, 18, 0, 0)), 6);
+  // "today" at 02:00 on the 21st is still the 20th
+  const small = S.timeline(late, mk(2026, 10, 21, 2, 0), 'week');
+  assert.equal(S.dayKey(small.buckets[1].start), '2026-10-20');
+  assert.equal(small.buckets[1].isCurrent, true);
+  assert.deepEqual(S.countedDays(late, mk(2026, 10, 21, 2, 0)).map(S.dayKey), ['2026-10-17', '2026-10-18', '2026-10-19']);
+  // with the day starting at midnight the same data falls back to calendar days
+  S.setDayStart(0);
+  assert.equal(S.dayEntries(late, mk(2026, 10, 17, 0, 0)).length, 4);
+  assert.equal(S.dayEntries(late, mk(2026, 10, 18, 0, 0)).length, 3);
+  assert.equal(S.fmtMinutes(S.summary(late, now).avgFirst), '04:50');   // first of the 17th 09:00, of the 18th 00:40
+  S.setDayStart(6);
+});
+
 console.log(passed + ' checks passed' + (process.exitCode ? ', some FAILED' : ''));
